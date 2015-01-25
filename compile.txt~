@@ -1,0 +1,19 @@
+1) first thing's first : install java development kit:
+	1) sudo apt-get install openjdk-7-jdk
+
+2) now java compiler will be installed. To confirm type in the terminal:
+	javac
+
+3) try the test file first.java by compiling as : 
+	javac first.java
+
+3) now execute : 
+	java first
+	
+	[ a first.class firll will be created]
+
+*Remember : xxx.java should contain a class named xxx inside
+
+:D
+
+RIP java
