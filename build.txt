@@ -8,7 +8,7 @@
 
 	hit ant in terminal to be sure
 
-3) now 'ant' searches of 'build.xml' in the current directory : so hit following command for test : 
+3) now 'ant' searches for 'build.xml' in the current directory : so hit following command for test : 
 	
 	ant compile
 	ant jar
