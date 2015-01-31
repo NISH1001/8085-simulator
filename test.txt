@@ -1,8 +1,6 @@
-... ...
-  ;  hello i                am   
-paradox
 
+;;sample test
 
-yes
+mov a,   b ; ;  mov from b to a
 
-       you are    correct
+mvi b, 04h
