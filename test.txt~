@@ -1,4 +1,0 @@
-
-mov a,   b ; ;  mov from b to a
-
-mvi b, 04h
