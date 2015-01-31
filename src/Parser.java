@@ -20,7 +20,7 @@ public class Parser
 	{
 		try
 		{
-    		BufferedReader reader = new BufferedReader( new FileReader( "test.txt"));
+    		BufferedReader reader = new BufferedReader( new FileReader(filename));
     		String line;
 
     		while((line = reader.readLine()) != null)
@@ -39,12 +39,12 @@ public class Parser
     				{
     					line = line.substring(0, commentindex);
     					line = line.trim();
-    					m_lines.add(line);
+    					m_lines.add(line.toUpperCase());
     				}
 
     				else
     				{
-    					m_lines.add(line);
+    					m_lines.add(line.toUpperCase());
     				}
     			}
     		}

@@ -1,6 +1,8 @@
 
 ;;sample test
 
-mov a,   b ; ;  mov from b to a
+06 12	;mvi b, 12 
 
-mvi b, 04h
+c3	;mov a,b
+
+
