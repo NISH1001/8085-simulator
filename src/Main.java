@@ -5,6 +5,10 @@ public class Main
 	{
 		Parser p = new Parser("test.txt");
 
-		p.DisplayLines();
+		//p.DisplayLines();
+
+		Memory mem = new Memory();
+		mem.Display();
+
     }
 }

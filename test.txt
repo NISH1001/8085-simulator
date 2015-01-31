@@ -3,6 +3,6 @@
 
 06 12	;mvi b, 12 
 
-c3	;mov a,b
+78	;mov a,b
 
 
