@@ -76,7 +76,8 @@ public class Parser
     					{
     						if(!splitted[i].matches("[0-9A-F][0-9A-F]"))
     						{
-    							throw new ParseException("Invalid code -> " + splitted[i]);
+    							String error = "Invalid code -> " + splitted[i] + " :: in line -> " + line;
+    							throw new ParseException(error);
     						}
     					}	
 
@@ -97,7 +98,7 @@ public class Parser
     					try
     					{
     						if((memory.onebyte.get((int)codes[0])) == null)
-    							throw new ParseException("Invalid onebyte insturcion -> " + splitted[0]);
+    							throw new ParseException("Invalid onebyte insturcion -> " + line);
     					}
 
     					catch(ParseException err)
@@ -115,7 +116,7 @@ public class Parser
     					try
     					{
     						if(memory.twobyte.get((int)codes[0]) == null)
-    							throw new ParseException("Invalid twobyte insturcion -> " + splitted[0]);
+    							throw new ParseException("Invalid twobyte insturcion -> " + line);
     					}
 
     					catch(ParseException err)
@@ -132,7 +133,7 @@ public class Parser
     					try
     					{
     						if(memory.threebyte.get((int)codes[0]) == null)
-    							throw new ParseException("Invalid threebyte insturcion -> " + splitted[0]);
+    							throw new ParseException("Invalid threebyte insturcion -> " + line);
     					}
 
     					catch(ParseException err)

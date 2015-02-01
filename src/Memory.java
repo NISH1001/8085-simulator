@@ -25,7 +25,7 @@ public class Memory
 		{
 			if(RAM[i] != -1)
 			{
-				System.out.println(RAM[i] + "\n");
+				System.out.println(RAM[i]);
 			}
 		}
 	}
@@ -36,7 +36,7 @@ public class Memory
 		{
 			if(RAM[i] != -1)
 			{
-				System.out.println(Integer.toHexString(RAM[i]) + "\n");
+				System.out.println(Integer.toHexString(RAM[i]));
 			}
 		}
 	}
@@ -94,6 +94,16 @@ public class Memory
 		onebyte.put(0x1D, "DCR E");
 		onebyte.put(0x25, "DCR H");
 		onebyte.put(0x2D, "DCR L");
+		onebyte.put(0x35, "DCR M");
+
+		onebyte.put(0x3C, "INR A");
+		onebyte.put(0x04, "INR B");
+		onebyte.put(0x0C, "INR C");
+		onebyte.put(0x14, "INR D");
+		onebyte.put(0x1C, "INR E");
+		onebyte.put(0x24, "INR H");
+		onebyte.put(0x2C, "INR L");
+		onebyte.put(0x34, "INR M");
 	}
 
 	public static HashMap<Integer, String> twobyte;
@@ -114,6 +124,11 @@ public class Memory
 	static
 	{
 		threebyte = new HashMap<Integer, String>();
+
+		threebyte.put(0x01, "LXI B");
+		threebyte.put(0x11, "LXI D");
+		threebyte.put(0x21, "LXI H");
+		threebyte.put(0x31, "LXI SP");
 	}
 
 	public static HashMap<String, Short> REGISTER;

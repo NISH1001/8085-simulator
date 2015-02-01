@@ -14,7 +14,7 @@ public class Main
 		if(p.Initialize("test.txt"))
 		{
 			mem = p.GetMemory();
-			mem.DisplayRAMDec();
+			mem.DisplayRAMHex();
 		}
 
     }
