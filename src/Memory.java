@@ -12,10 +12,36 @@ public class Memory
 	
 	public Memory()
 	{
-
+		PC = 0;
+		SP = 0xFFFF;
+		RAM = new short[MAXMEMSIZE];
+		Arrays.fill(RAM, (short)-1);
+		IO = new short[MAXIOSIZE];
 	}
 
-	public void Display()
+	public void DisplayRAMDec()
+	{
+		for(int i=0; i<RAM.length; ++i)
+		{
+			if(RAM[i] != -1)
+			{
+				System.out.println(RAM[i] + "\n");
+			}
+		}
+	}
+
+	public void DisplayRAMHex()
+	{
+		for(int i=0; i<RAM.length; ++i)
+		{
+			if(RAM[i] != -1)
+			{
+				System.out.println(Integer.toHexString(RAM[i]) + "\n");
+			}
+		}
+	}
+
+	public void DisplayHashMap()
 	{
 		Iterator <Map.Entry<Integer, String>> iter = onebyte.entrySet().iterator();
 
@@ -60,18 +86,53 @@ public class Memory
 		}
 
 		//any onebyte instruction -> add here
+
+		onebyte.put(0x3D, "DCR A");
+		onebyte.put(0x05, "DCR B");
+		onebyte.put(0x0D, "DCR C");
+		onebyte.put(0x15, "DCR D");
+		onebyte.put(0x1D, "DCR E");
+		onebyte.put(0x25, "DCR H");
+		onebyte.put(0x2D, "DCR L");
 	}
 
 	public static HashMap<Integer, String> twobyte;
 	static
 	{
+		twobyte = new HashMap<Integer, String>();
 
+		twobyte.put(0x3E, "MVI A");
+		twobyte.put(0x06, "MVI B");
+		twobyte.put(0x0E, "MVI C");
+		twobyte.put(0x16, "MVI D");
+		twobyte.put(0x1E, "MVI E");
+		twobyte.put(0x26, "MVI H");
+		twobyte.put(0x2E, "MVI L");
 	}
 
 	public static HashMap<Integer, String> threebyte;
 	static
 	{
-
+		threebyte = new HashMap<Integer, String>();
 	}
 
+	public static HashMap<String, Short> REGISTER;
+	static
+	{
+		REGISTER = new HashMap<String, Short>();
+		REGISTER.put("B", (short)0);
+		REGISTER.put("C", (short)0);
+		REGISTER.put("D", (short)0);
+		REGISTER.put("E", (short)0);
+		REGISTER.put("H", (short)0);
+		REGISTER.put("L", (short)0);
+		REGISTER.put("A", (short)0);
+		REGISTER.put("AF", (short)0);
+	}
+
+	private static final int MAXMEMSIZE = 0x10000;
+	private static final int MAXIOSIZE = 0x10000;
+	public short[] RAM;
+	public short[] IO;
+	public int SP, PC;
 }

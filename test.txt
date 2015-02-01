@@ -1,8 +1,8 @@
 
 ;;sample test
 
-06 12	;mvi b, 12 
+3E 12 	;mvi b, 12 
 
-78	;mov a,b
+78 	;mov a,b
 
 
