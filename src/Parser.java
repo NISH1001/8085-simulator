@@ -98,7 +98,7 @@ public class Parser
     					try
     					{
     						if((memory.onebyte.get((int)codes[0])) == null)
-    							throw new ParseException("Invalid onebyte insturcion -> " + line);
+    							throw new ParseException("Invalid onebyte instruction -> " + line);
     					}
 
     					catch(ParseException err)
@@ -116,7 +116,7 @@ public class Parser
     					try
     					{
     						if(memory.twobyte.get((int)codes[0]) == null)
-    							throw new ParseException("Invalid twobyte insturcion -> " + line);
+    							throw new ParseException("Invalid twobyte instruction -> " + line);
     					}
 
     					catch(ParseException err)
@@ -133,7 +133,7 @@ public class Parser
     					try
     					{
     						if(memory.threebyte.get((int)codes[0]) == null)
-    							throw new ParseException("Invalid threebyte insturcion -> " + line);
+    							throw new ParseException("Invalid threebyte instruction -> " + line);
     					}
 
     					catch(ParseException err)

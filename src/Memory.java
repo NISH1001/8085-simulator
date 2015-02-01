@@ -2,8 +2,8 @@ import java.io.*;
 import java.util.*;
 
 /*
-	Our Memory class :  has both ROM and RAM
-	ROM -> contains hashtable for onebyteinstruction, twobyte, threebytes
+	Our Memory class :  has both hashmaps and RAM, REGISTERS, SP, PC,...
+	Hashmaps -> contains hashtable for onebyteinstruction, twobyte, threebytes
 	RAM -> holds the bytevalues as integer , of instructions provided by the user 
 */
 
@@ -16,9 +16,12 @@ public class Memory
 		SP = 0xFFFF;
 		RAM = new short[MAXMEMSIZE];
 		Arrays.fill(RAM, (short)-1);
+		FLAGS = new boolean[5];
+		Arrays.fill(FLAGS, false);
 		IO = new short[MAXIOSIZE];
 	}
 
+	//display RAM in decimal
 	public void DisplayRAMDec()
 	{
 		for(int i=0; i<RAM.length; ++i)
@@ -30,6 +33,7 @@ public class Memory
 		}
 	}
 
+	//display RAM in hex
 	public void DisplayRAMHex()
 	{
 		for(int i=0; i<RAM.length; ++i)
@@ -74,6 +78,7 @@ public class Memory
 		char[] registers = {'B', 'C', 'D', 'E', 'H', 'L', 'M', 'A'};
 		String mov = "MOV ";
 		
+		//generate 
 		for(int index = 0; index<8; ++index)
 		{
 			for(int i=0; i<8; ++i)
@@ -135,9 +140,9 @@ public class Memory
 				onebyte.put(0x1B, "DCX D") ;
 				onebyte.put(0x2B, "DCX H") ;
 				onebyte.put(0x3B, "DCX SP" );
-				onebyte.put(0xF3,"DI")  ;
-				onebyte.put(0xFB,"EI" ) ;
-				onebyte.put(0x76,"HLT") ;
+				onebyte.put(0xF3, "DI")  ;
+				onebyte.put(0xFB, "EI" ) ;
+				onebyte.put(0x76, "HLT") ;
 				onebyte.put(0x3C, "INR A"); 
 				onebyte.put(0x04, "INR B"); 
 				onebyte.put(0x0C, "INR C"); 
@@ -152,69 +157,6 @@ public class Memory
 				onebyte.put(0x33, "INX SP") ;
 				onebyte.put(0x0A, "LDAX B") ; 
 				onebyte.put(0x1A, "LDAX D") ; 
-				onebyte.put(0x7F, "MOV A, A"); 
-				onebyte.put(0x78, "MOV A, B"); 
-				onebyte.put(0x79, "MOV A, C"); 
-				onebyte.put(0x7A, "MOV A, D"); 
-				onebyte.put(0x7B, "MOV A, E"); 
-				onebyte.put(0x7C, "MOV A, H"); 
-				onebyte.put(0x7D, "MOV A, L"); 
-				onebyte.put(0x7E, "MOV A, M"); 
-				onebyte.put(0x47, "MOV B, A"); 
-				onebyte.put(0x40, "MOV B, B"); 
-				onebyte.put(0x41, "MOV B, C"); 
-				onebyte.put(0x42, "MOV B, D"); 
-				onebyte.put(0x43, "MOV B, E"); 
-				onebyte.put(0x44, "MOV B, H"); 
-				onebyte.put(0x45, "MOV B, L"); 
-				onebyte.put(0x46, "MOV B, M"); 
-				onebyte.put(0x4F, "MOV C, A"); 
-				onebyte.put(0x48, "MOV C, B"); 
-				onebyte.put(0x49, "MOV C, C"); 
-				onebyte.put(0x4A, "MOV C, D"); 
-				onebyte.put(0x4B, "MOV C, E"); 
-				onebyte.put(0x4C, "MOV C, H"); 
-				onebyte.put(0x4D, "MOV C, L"); 
-				onebyte.put(0x4E, "MOV C, M"); 
-				onebyte.put(0x57, "MOV D, A"); 
-				onebyte.put(0x50, "MOV D, B"); 
-				onebyte.put(0x51, "MOV D, C"); 
-				onebyte.put(0x52, "MOV D, D"); 
-				onebyte.put(0x53, "MOV D, E"); 
-				onebyte.put(0x54, "MOV D, H"); 
-				onebyte.put(0x55, "MOV D, L"); 
-				onebyte.put(0x56, "MOV D, M"); 
-				onebyte.put(0x5F, "MOV E, A"); 
-				onebyte.put(0x58, "MOV E, B"); 
-				onebyte.put(0x59, "MOV E, C"); 
-				onebyte.put(0x5A, "MOV E, D"); 
-				onebyte.put(0x5B, "MOV E, E"); 
-				onebyte.put(0x5C, "MOV E, H"); 
-				onebyte.put(0x5D, "MOV E, L"); 
-				onebyte.put(0x5E, "MOV E, M"); 
-				onebyte.put(0x67, "MOV H, A"); 
-				onebyte.put(0x60, "MOV H, B"); 
-				onebyte.put(0x61, "MOV H, C"); 
-				onebyte.put(0x62, "MOV H, D"); 
-				onebyte.put(0x63, "MOV H, E"); 
-				onebyte.put(0x64, "MOV H, H"); 
-				onebyte.put(0x65, "MOV H, L"); 
-				onebyte.put(0x66, "MOV H, M"); 
-				onebyte.put(0x6F, "MOV L, A"); 
-				onebyte.put(0x68, "MOV L, B"); 
-				onebyte.put(0x69, "MOV L, C"); 
-				onebyte.put(0x6A, "MOV L, D"); 
-				onebyte.put(0x6B, "MOV L, E"); 
-				onebyte.put(0x6C, "MOV L, H"); 
-				onebyte.put(0x6D, "MOV L, L"); 
-				onebyte.put(0x6E, "MOV L, M"); 
-				onebyte.put(0x77, "MOV M, A"); 
-				onebyte.put(0x70, "MOV M, B"); 
-				onebyte.put(0x71, "MOV M, C"); 
-				onebyte.put(0x72, "MOV M, D"); 
-				onebyte.put(0x73, "MOV M, E"); 
-				onebyte.put(0x74, "MOV M, H"); 
-				onebyte.put(0x75, "MOV M, L"); 
 				onebyte.put(0x00, "NOP" ) ;
 				onebyte.put(0xB7, "ORA A" ) ; 
 				onebyte.put(0xB0, "ORA B" ) ; 
@@ -229,10 +171,10 @@ public class Memory
 				onebyte.put(0xD1, "POP D"  );
 				onebyte.put(0xE1, "POP H"  );
 				onebyte.put(0xF1, "POP PSW");
-				onebyte.put(0xC5 , "PUSH B" ); 
-				onebyte.put(0xD5 , "PUSH D" );  
-				onebyte.put(0xE5 , "PUSH H" ); 
-				onebyte.put(0xF5 , "PUSH PSW");
+				onebyte.put(0xC5, "PUSH B" ); 
+				onebyte.put(0xD5, "PUSH D" );  
+				onebyte.put(0xE5, "PUSH H" ); 
+				onebyte.put(0xF5, "PUSH PSW");
 				onebyte.put(0x17, "RAL"); 
 				onebyte.put(0x1F, "RAR"); 
 				onebyte.put(0xD8, "RC" );
@@ -364,5 +306,6 @@ public class Memory
 	private static final int MAXIOSIZE = 0x10000;
 	public short[] RAM;
 	public short[] IO;
+	public boolean[] FLAGS; //S Z A P C
 	public int SP, PC;
 }
