@@ -16,7 +16,7 @@ public class Main
             mem.DisplayRAMHex();
         }
 
-        Timer t = new Timer(0.0000005);
+        Timer t = new Timer(0.000010);
         Test tst = new Test();
         t.register(tst);
         t.run();

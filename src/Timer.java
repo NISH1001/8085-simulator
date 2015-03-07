@@ -1,5 +1,11 @@
 import java.util.ArrayList;
 
+/* The Timer class represents the system clock generator.
+ * It provides synchronization for the entire system,
+ * by periodically sending out ticks to device that listen.
+ * The tick-sending is actually just a call to a sync() method
+ * on a class that implements the Synchronous interface.
+ */
 public class Timer
 {
     // Frequency of the system clock in megahertz
