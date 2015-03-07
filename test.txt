@@ -7,7 +7,7 @@
 
 01 12 34 ;lxi b, 1234h
 
-;inr a 
-3c 
+;inr a
+3c
 
 Ef; inx h
