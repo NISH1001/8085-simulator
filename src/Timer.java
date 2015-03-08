@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * The tick-sending is actually just a call to a sync() method
  * on a class that implements the Synchronous interface.
  */
-public class Timer
+public class Timer implements Runnable
 {
     // Frequency of the system clock in megahertz
     double frequency;
@@ -17,6 +17,9 @@ public class Timer
     // Listeners of the SYNC event, which signals that a rising
     // edge is occuring in the clock pulse
     ArrayList<Synchronous> listeners;
+
+    // Thread object of self
+    private Thread thr;
 
     public Timer(double mhz) {
         if (mhz<=0)
@@ -31,7 +34,7 @@ public class Timer
         listeners.add(lstnr);
     }
 
-    // Start and run the timer thread
+    // worker for the timer thread
     public void run() {
         long startTime = System.nanoTime();
         long accTime;
@@ -44,6 +47,14 @@ public class Timer
                 startTime = accTime;
             }
             Thread.yield();
+        }
+    }
+
+    // Start thread
+    public void start() {
+        if (thr==null) {
+            thr = new Thread(this,"timer_thread");
+            thr.start();
         }
     }
 }
