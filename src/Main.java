@@ -15,10 +15,15 @@ public class Main
             mem = p.GetMemory();
             mem.DisplayRAMHex();
         }
-
-        Timer t = new Timer(0.000010);
+        BooleanMutable bm = new BooleanMutable();
+        ControlLines cl = new ControlLines();
         Test tst = new Test();
-        t.register(tst);
-        t.run();
+        cl.reflect("CL_TEST",bm);
+        cl.reflect("CL_TEST",tst.bm);
+        bm.print();
+        tst.bm.print();
+        cl.set("CL_TEST",true);
+        bm.print();
+        tst.bm.print();
     }
 }
