@@ -16,7 +16,7 @@ public class Main
             mem.DisplayRAMHex();
         }
 
-        Timer tmr = new Timer(0.000001);
+        Timer tmr = new Timer(0.000010);
         Bus address_bus = new Bus(16);
         Bus data_bus = new Bus(8);
         ControlLines clines = new ControlLines();

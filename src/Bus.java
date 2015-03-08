@@ -58,18 +58,18 @@ public class Bus
                 pins[i] = (bits[i]==true)?
                     LogicStates.high:LogicStates.low;
             }
-        }
-        // Write out to the readers
-        for (BitsWritable wr : readers) {
-            if (wr.canWrite()) {
-                boolean[] bits = new boolean[pins.length];
-                for (int i=0; i<pins.length; i++)
-                    if (pins[i]!=LogicStates.floating)
-                        bits[i] = (pins[i]==LogicStates.high)?
-                            true:false;
-                wr.write(bits);
+            // Write out to the readers
+            for (BitsWritable wr : readers) {
+                synchronized (wr) {
+                if (wr.canWrite()) {
+                    boolean[] bts = new boolean[pins.length];
+                    for (int i=0; i<pins.length; i++)
+                        if (pins[i]!=LogicStates.floating)
+                            bts[i] = (pins[i]==LogicStates.high)?
+                                true:false;
+                    wr.write(bts);
+                }}
             }
-
         }
     }
 
@@ -81,5 +81,20 @@ public class Bus
     // Is the bus tri-stated?
     public boolean tristated() {
         return pins[0]==LogicStates.floating;
+    }
+
+    // Show contents
+    public void show() {
+        String disp = "";
+        for (LogicStates ls : pins) {
+            if (ls==LogicStates.high) {
+                disp += "H";
+            } else if (ls==LogicStates.low) {
+                disp += "L";
+            } else {
+                disp += "F";
+            }
+        }
+        System.out.println(disp);
     }
 }

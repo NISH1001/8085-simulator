@@ -18,13 +18,14 @@ public class Register implements
     }
 
     public void write(boolean[] bits) {
-        if (loadable.get())
+        //if (loadable.get())
             for(int i=0;i<bits.length && i<bitfield.length;i++)
                 bitfield[i] = bits[i];
     }
 
     public boolean canWrite() {
-        return (boolean)loadable.get();
+        return true;
+        //return (boolean)loadable.get();
     }
 
     public int asInt() {

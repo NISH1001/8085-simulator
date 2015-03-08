@@ -13,7 +13,7 @@ public class MemoryModule extends Synchronous {
     BooleanMutable Wr;
 
     // Data
-    byte[] data;
+    int[] data;
 
     // References to the buses
     Bus baddress, bdata;
@@ -22,7 +22,7 @@ public class MemoryModule extends Synchronous {
     public MemoryModule(Bus addrbus, Bus databus,
             ControlLines clines) {
         // Initialize 64K of RAM
-        data = new byte[65536];
+        data = new int[65536];
         // create the registers
         raddress = new Register(16);
         rdata = new Register(8);
@@ -30,6 +30,7 @@ public class MemoryModule extends Synchronous {
         Rd = new BooleanMutable();
         Wr = new BooleanMutable();
         addrbus.registerReader(raddress);
+        databus.registerReader(rdata);
         datawriteid = databus.registerWriter(rdata);
         clines.reflect("IO_M'",IoMbar);
         clines.reflect("!IO_M'",raddress.loadable);
@@ -46,12 +47,16 @@ public class MemoryModule extends Synchronous {
         while (true) {
             synchronized (ticks) { if (ticks>0) {
                 if (Rd.get()==true && IoMbar.get()==false) {
+                    /*System.out.println("read");
+                    System.out.println(data[raddress.asInt()]);*/
                     rdata.fromInt(data[raddress.asInt()]);
                     bdata.select(datawriteid);
                     dataout = true;
                 } else if (Wr.get()==true &&
                         IoMbar.get()==false) {
-                    data[raddress.asInt()] = (byte)rdata.asInt();
+                    /*System.out.println("write");
+                    System.out.println(rdata.asInt());*/
+                    data[raddress.asInt()] = rdata.asInt();
                 }
                 if (dataout && Rd.get()==false) {
                     bdata.select(0);

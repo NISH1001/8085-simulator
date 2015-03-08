@@ -1,3 +1,5 @@
+import java.util.Random;
+
 public class Test extends Synchronous {
     int t,awriteid,dwriteid;
     Bus adb, dtb;
@@ -15,35 +17,46 @@ public class Test extends Synchronous {
     }
 
     public void run() {
+        Random randgen = new Random();
+        int ourint = 0;
+        boolean error = false;
         while (true) {
             synchronized (ticks) { if (ticks>0) {
                 if (t==0) {
                     cln.set("IO_M'",false);
                     cln.set("RD",false);
                     cln.set("WR",true);
-                    mar.fromInt(0);
+                    mar.fromInt(2);
                     adb.select(awriteid);
-                    dtr.fromInt(55);
+                    ourint = randgen.nextInt(255);
+                    dtr.fromInt(ourint);
+                    dtb.select(dwriteid);
                 } else if (t==1) {
-                    cln.set("WR",false);
-                    adb.select(0);
-                    dtb.select(0);
+                    //adb.select(0);
                 } else if (t==2) {
-                    cln.set("RD",true);
-                    mar.fromInt(0);
-                    adb.select(awriteid);
+                    cln.set("WR",false);
+                    dtb.select(0);
                 } else if (t==3) {
-                    if (dtb.tristated()) {
-                        System.out.println("tristated");
-                    } else {
-                        System.out.println(dtr.asInt());
-                    }
+                    dtr.fromInt(111);
+                    dtr.loadable.set(true);
+                    cln.set("RD",true);
+                    mar.fromInt(2);
+                    adb.select(awriteid);
+                    dtb.select(0);
+                } else if (t==4) {
+                } else if (t==5) {
+                    while (dtb.tristated())
+                        Thread.yield();
+                    //System.out.println(dtr.asInt());
+                    if (ourint!=dtr.asInt())
+                        System.out.println("error");
                     adb.select(0);
                     dtb.select(0);
                     cln.set("RD",false);
+                    dtr.loadable.set(false);
                 }
                 t++;
-                if (t==4)
+                if (t==6)
                     t = 0;
                 ticks = 0;
             }}
