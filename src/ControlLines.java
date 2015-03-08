@@ -21,18 +21,50 @@ public class ControlLines {
             new HashMap<String,ArrayList<BooleanMutable>>();
     }
 
+    private boolean eval(String expression) {
+        if (has(expression))
+            return get(expression);
+        if (expression.contains("|")) {
+            String[] items = expression.split("\\|");
+            for (String item : items)
+                if (eval(item))
+                    return true;
+        } else if (expression.contains("&")) {
+            String[] items = expression.split("&");
+            for (String item : items)
+                if (!eval(item))
+                    return false;
+        }
+        return false;
+    }
+
+    private String inverseKey(String key) {
+        if (key.charAt(0) == '!')
+            return key.substring(1);
+        else
+            return "!"+key;
+    }
+
     // Set a value for a specific line
     public void set(String key, boolean value) {
-        lines.put(key,value);
-        if (reflectors.containsKey(key))
-            for (BooleanMutable bm : reflectors.get(key))
-                bm.set(value);
+        String ikey = inverseKey(key);
+        if (lines.containsKey(ikey))
+            lines.put(ikey,!value);
+        else
+            lines.put(key,value);
+
+        for (String expr : reflectors.keySet())
+            for (BooleanMutable bm : reflectors.get(expr))
+                bm.set(eval(expr));
     }
 
     // Get a value for a specific line. False if doesn't exist
     public boolean get(String key) {
+        String invertedkey = inverseKey(key);
         if (lines.containsKey(key))
             return lines.get(key);
+        else if (lines.containsKey(invertedkey))
+            return lines.get(invertedkey);
         return false;
     }
 
@@ -46,5 +78,13 @@ public class ControlLines {
             nlist.add(ff);
             reflectors.put(linename,nlist);
         }
+    }
+
+    public boolean has(String key) {
+        String ikey = inverseKey(key);
+        if (lines.containsKey(key) || lines.containsKey(ikey))
+            return true;
+        else
+            return false;
     }
 }

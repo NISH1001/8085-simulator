@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class RegisterGroup implements Synchronous {
+public class RegisterGroup extends Synchronous {
     ArrayList<Register> reglist;
 
     public RegisterGroup() {
@@ -11,6 +11,6 @@ public class RegisterGroup implements Synchronous {
         reglist.add(reg);
     }
 
-    public void sync() {
+    public void run() {
     }
 }

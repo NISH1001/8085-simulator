@@ -26,4 +26,22 @@ public class Register implements
     public boolean canWrite() {
         return (boolean)loadable.get();
     }
+
+    public int asInt() {
+        int a = 1;
+        int res = 0;
+        for (boolean bit : bitfield) {
+            if (bit)
+                res += a;
+            a *= 2;
+        }
+        return res;
+    }
+
+    public void fromInt(int value) {
+        for (int i=0; i<bitfield.length; i++) {
+            bitfield[i] = (value%2==0)?false:true;
+            value /= 2;
+        }
+    }
 }

@@ -53,7 +53,7 @@ public class Timer implements Runnable
     // Start thread
     public void start() {
         if (thr==null) {
-            thr = new Thread(this,"timer_thread");
+            thr = new Thread(this,"Timer_thread");
             thr.start();
         }
     }

@@ -15,15 +15,22 @@ public class Main
             mem = p.GetMemory();
             mem.DisplayRAMHex();
         }
-        BooleanMutable bm = new BooleanMutable();
-        ControlLines cl = new ControlLines();
-        Test tst = new Test();
-        cl.reflect("CL_TEST",bm);
-        cl.reflect("CL_TEST",tst.bm);
-        bm.print();
-        tst.bm.print();
-        cl.set("CL_TEST",true);
-        bm.print();
-        tst.bm.print();
+
+        Timer tmr = new Timer(0.000001);
+        Bus address_bus = new Bus(16);
+        Bus data_bus = new Bus(8);
+        ControlLines clines = new ControlLines();
+        clines.set("IO_M",false);
+        clines.set("RD",false);
+        clines.set("WR",false);
+
+        MemoryModule m = new MemoryModule(address_bus,
+                data_bus, clines);
+        Test tst = new Test(address_bus, data_bus, clines);
+        tmr.register(m);
+        tmr.register(tst);
+        tmr.start();
+        m.start();
+        tst.start();
     }
 }

@@ -28,6 +28,8 @@ public class Bus
     public Bus(int width) {
         pins = new LogicStates[width];
         Arrays.fill(pins,LogicStates.floating);
+        writers = new ArrayList<BitsReadable>();
+        readers = new ArrayList<BitsWritable>();
     }
 
     // Register a writer. Returns the bus selector id.
@@ -74,5 +76,10 @@ public class Bus
     // Get the pins
     public LogicStates[] getPins() {
         return pins;
+    }
+
+    // Is the bus tri-stated?
+    public boolean tristated() {
+        return pins[0]==LogicStates.floating;
     }
 }
