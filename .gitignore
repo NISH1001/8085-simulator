@@ -3,3 +3,5 @@
 test.txt~
 .gitignore~
 build/
+*.swp
+.vim_session_
