@@ -169,21 +169,27 @@ public class Parser
         return true;
     }
 
+    // convert the line to our primitive hex code
     public String ConvertToHex(String line)
     {
+        //first iterate over onebyte instruction
         Iterator <Map.Entry<Integer, String>> iter = memory.onebyte.entrySet().iterator();
 
+        //for converted line into hexcode
         String converted = line;
         boolean matched = false;
 
+        //loop through onebyte insturction
         while(iter.hasNext())
         {
             Map.Entry<Integer, String> opcode = iter.next();
             String hexcode = Integer.toHexString(opcode.getKey());
             String engcode = opcode.getValue();
 
+            //search for substring like MOV A,B
             matched = line.toUpperCase().contains(engcode.toUpperCase());
 
+            //if line contains instruction then replace with hex value
             if(matched)
             {
                 converted = line.replaceAll(engcode, hexcode);
@@ -191,6 +197,7 @@ public class Parser
             }
         }
 
+        //if one byte instruciton failed -> do same for two byte instruction
         if(!matched)
         {
             iter = memory.twobyte.entrySet().iterator();
@@ -201,6 +208,7 @@ public class Parser
                 String hexcode = Integer.toHexString(opcode.getKey());
                 String engcode = opcode.getValue();
 
+                //replae *,* with just a space
                 line = line.replaceAll("\\s*,\\s*", " ");
                 matched = line.toUpperCase().contains(engcode.toUpperCase());
 
@@ -213,6 +221,7 @@ public class Parser
 
         }
 
+        //if two  byte instruciton failed -> do same for three  byte instruction
         if(!matched)
         {
             iter = memory.threebyte.entrySet().iterator();
@@ -223,6 +232,7 @@ public class Parser
                 String hexcode = Integer.toHexString(opcode.getKey());
                 String engcode = opcode.getValue();
 
+                //replae *,* with just a space
                 line = line.replaceAll("\\s*,\\s*", " ");
                 matched = line.toUpperCase().contains(engcode.toUpperCase());
 
