@@ -5,16 +5,20 @@ import java.lang.String;
 public class Parser
 {
     //where the parsed hexcodes gets stored as RAM
-    private Memory memory;
+    private Opcode opcode;
+
+    //to store the parsed hexcodes
+    private ArrayList<Short> data;
 
     public Parser()
     {
-        memory = new Memory();
+        data = new ArrayList<Short>();
+        opcode = new Opcode();
     }
 
     public boolean Initialize(String filename)
     {
-        //System.out.println(memory.onebyte.get(0));
+        //System.out.println(opcode.onebyte.get(0));
         try
         {
             BufferedReader reader =
@@ -102,7 +106,7 @@ public class Parser
                     {
                         try
                         {
-                            if((memory.onebyte.get((int)codes[0])) == null)
+                            if((opcode.onebyte.get((int)codes[0])) == null)
                                 throw new ParseException("Invalid onebyte instruction -> " + line);
                         }
 
@@ -120,7 +124,7 @@ public class Parser
                     {
                         try
                         {
-                            if(memory.twobyte.get((int)codes[0]) == null)
+                            if(opcode.twobyte.get((int)codes[0]) == null)
                                 throw new ParseException("Invalid twobyte instruction -> " + line);
                         }
 
@@ -137,7 +141,7 @@ public class Parser
                     {
                         try
                         {
-                            if(memory.threebyte.get((int)codes[0]) == null)
+                            if(opcode.threebyte.get((int)codes[0]) == null)
                                 throw new ParseException("Invalid threebyte instruction -> " + line);
                         }
 
@@ -152,7 +156,7 @@ public class Parser
                     //if everthing is success store into RAM
                     for(int i=0; i<len; ++i)
                     {
-                        memory.RAM[index++] = codes[i];
+                        data.add(codes[i]);
                     }
 
                 }
@@ -173,7 +177,7 @@ public class Parser
     public String ConvertToHex(String line)
     {
         //first iterate over onebyte instruction
-        Iterator <Map.Entry<Integer, String>> iter = memory.onebyte.entrySet().iterator();
+        Iterator <Map.Entry<Integer, String>> iter = opcode.onebyte.entrySet().iterator();
 
         //for converted line into hexcode
         String converted = line;
@@ -200,7 +204,7 @@ public class Parser
         //if one byte instruciton failed -> do same for two byte instruction
         if(!matched)
         {
-            iter = memory.twobyte.entrySet().iterator();
+            iter = opcode.twobyte.entrySet().iterator();
 
             while(iter.hasNext())
             {
@@ -224,7 +228,7 @@ public class Parser
         //if two  byte instruciton failed -> do same for three  byte instruction
         if(!matched)
         {
-            iter = memory.threebyte.entrySet().iterator();
+            iter = opcode.threebyte.entrySet().iterator();
 
             while(iter.hasNext())
             {
@@ -248,8 +252,23 @@ public class Parser
         return converted;
     }
 
-    public Memory GetMemory()
+    //to show parsed data
+    public void ShowData()
     {
-        return this.memory;
+        for (Short d : data)
+        {
+            System.out.println(Integer.toHexString(d));
+        }
+    }
+
+    //to write to memory
+    public void WriteToMemory(MemoryModule mem, int start_addr)
+    {
+       int i = 0 ; 
+       for(Short d : data)
+       {
+           mem.writeByte(start_addr+i, d);
+           i++;
+       }
     }
 }

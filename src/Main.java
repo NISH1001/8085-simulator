@@ -2,18 +2,20 @@ public class Main
 {
     public static void main(String[] args)
     {
-        /*memory object
-          if parsing is successful the memory gets passed to
-          (to-be-build ) simulator class
-          */
-        Memory mem = new Memory();
+        //opcode object used by parser
+        Opcode op = new Opcode();
         Parser p = new Parser();
+
+        MemoryModule memory = new MemoryModule(0x0000, 0x10000);
 
         //if parser is successful get memory
         if(p.Initialize("test.txt"))
         {
-            mem = p.GetMemory();
-            mem.DisplayRAMHex();
+            //p.ShowData();
+            p.WriteToMemory(memory, 0x8000);
         }
+
+        System.out.println(memory.readByte(0x8001));
    }
+
 }
