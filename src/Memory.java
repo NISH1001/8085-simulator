@@ -84,7 +84,7 @@ public class Memory
         {
             for(int i=0; i<8; ++i)
             {
-                onebyte.put((i+64) + 8*index, mov + registers[index] + " " +  registers[i]);
+                onebyte.put((i+64) + 8*index, mov + registers[index] + "," +  registers[i]);
             }
         }
 

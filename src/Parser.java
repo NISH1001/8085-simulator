@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.lang.String;
 
 public class Parser
 {
@@ -44,6 +45,9 @@ public class Parser
                         line = line.substring(0, commentindex);
                         line = line.trim();
                     }
+                    
+                    line = line.toUpperCase();
+                    line  = ConvertToHex(line);
 
                     //now split the line by spaces
                     String[] splitted = line.split("\\s");
@@ -75,7 +79,7 @@ public class Parser
                         splitted[i] = splitted[i].toUpperCase();
                         try
                         {
-                            if(!splitted[i].matches("[0-9A-F][0-9A-F]"))
+                            if(!splitted[i].matches("([0-9A-F][0-9A-F])|([0-9A-F])"))
                             {
                                 String error = "Invalid code -> " + splitted[i] + " :: in line -> " + line;
                                 throw new ParseException(error);
@@ -163,6 +167,75 @@ public class Parser
         }
 
         return true;
+    }
+
+    public String ConvertToHex(String line)
+    {
+        Iterator <Map.Entry<Integer, String>> iter = memory.onebyte.entrySet().iterator();
+
+        String converted = line;
+        boolean matched = false;
+
+        while(iter.hasNext())
+        {
+            Map.Entry<Integer, String> opcode = iter.next();
+            String hexcode = Integer.toHexString(opcode.getKey());
+            String engcode = opcode.getValue();
+
+            matched = line.toUpperCase().contains(engcode.toUpperCase());
+
+            if(matched)
+            {
+                converted = line.replaceAll(engcode, hexcode);
+                break;
+            }
+        }
+
+        if(!matched)
+        {
+            iter = memory.twobyte.entrySet().iterator();
+
+            while(iter.hasNext())
+            {
+                Map.Entry<Integer, String> opcode = iter.next();
+                String hexcode = Integer.toHexString(opcode.getKey());
+                String engcode = opcode.getValue();
+
+                line = line.replaceAll("\\s*,\\s*", " ");
+                matched = line.toUpperCase().contains(engcode.toUpperCase());
+
+                if(matched)
+                {
+                    converted = line.replaceAll(engcode, hexcode);
+                    break;
+                }
+            }
+
+        }
+
+        if(!matched)
+        {
+            iter = memory.threebyte.entrySet().iterator();
+
+            while(iter.hasNext())
+            {
+                Map.Entry<Integer, String> opcode = iter.next();
+                String hexcode = Integer.toHexString(opcode.getKey());
+                String engcode = opcode.getValue();
+
+                line = line.replaceAll("\\s*,\\s*", " ");
+                matched = line.toUpperCase().contains(engcode.toUpperCase());
+
+                if(matched)
+                {
+                    converted = line.replaceAll(engcode, hexcode);
+                    break;
+                }
+            }
+
+        }
+
+        return converted;
     }
 
     public Memory GetMemory()

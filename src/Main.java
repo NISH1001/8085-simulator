@@ -14,6 +14,7 @@ public class Main
         {
             mem = p.GetMemory();
             mem.DisplayRAMHex();
+            //mem.DisplayHashMap();
         }
 
         Timer tmr = new Timer(0.000010);
