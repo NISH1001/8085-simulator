@@ -32,5 +32,5 @@ public class Register {
             power *= 2;
         }
         return value;
-    }
+   }
 }

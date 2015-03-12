@@ -1,7 +1,8 @@
 *.class
 *.jar
-test.txt~
-.gitignore~
+*~
+*.swp
+.vim_session_
 build/
 *.swp
 .vim_session_

@@ -50,6 +50,6 @@ public class Processor {
         ir.setFromInt(memRead(pc.getAsInt()));
     }
 
-    public run() {
+    public void run() {
     }
 }

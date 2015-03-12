@@ -26,5 +26,5 @@ public class MemoryModule implements Device {
 
     public byte readByte(int address) {
         return data[address-start_addr];
-    }
+   }
 }

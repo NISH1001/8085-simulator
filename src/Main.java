@@ -15,5 +15,5 @@ public class Main
             mem = p.GetMemory();
             mem.DisplayRAMHex();
         }
-    }
+   }
 }

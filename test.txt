@@ -5,9 +5,21 @@
 
 78 	;mov a,b
 
-01 12 34 ;lxi b, 1234h
+01 12    34 ;lxi b, 1234h
 
-;inr a 
-3c 
+;inr a
+3c
 
-Ef; inx h
+MOV B,C
+
+POP B
+
+MVI A, 12
+
+lxi b ,  12   34
+
+
+
+
+Ef  ; inx h
+

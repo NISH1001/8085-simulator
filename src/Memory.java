@@ -3,9 +3,10 @@ import java.util.*;
 
 /*
    Our Memory class :  has both hashmaps and RAM, REGISTERS, SP, PC,...
-   Hashmaps -> contains hashtable for onebyteinstruction, twobyte, threebytes
-   RAM -> holds the bytevalues as integer , of instructions provided by the user
-   */
+  Hashmaps -> contains hashtable for onebyteinstruction, twobyte,
+   threebytes
+   RAM -> holds the bytevalues as integer , of instructions provided
+   by the user */
 
 public class Memory
 {
@@ -24,7 +25,7 @@ public class Memory
     //display RAM in decimal
     public void DisplayRAMDec()
     {
-        for(int i=0;i<RAM.length;++i)
+        for(int i=0; i<RAM.length; ++i)
         {
             if(RAM[i] != -1)
             {
@@ -36,7 +37,7 @@ public class Memory
     //display RAM in hex
     public void DisplayRAMHex()
     {
-        for(int i=0;i<RAM.length;++i)
+        for(int i=0; i<RAM.length; ++i)
         {
             if(RAM[i] != -1)
             {
@@ -79,11 +80,11 @@ public class Memory
         String mov = "MOV ";
 
         //generate
-        for(int index = 0;index<8;++index)
+        for(int index = 0; index<8; ++index)
         {
-            for(int i=0;i<8;++i)
+            for(int i=0; i<8; ++i)
             {
-                onebyte.put((i+64) + 8*index, mov + registers[index] + " " +  registers[i]);
+                onebyte.put((i+64) + 8*index, mov + registers[index] + "," +  registers[i]);
             }
         }
 
@@ -239,7 +240,7 @@ public class Memory
         twobyte.put(0xC6, "ADI");
         twobyte.put(0xE6, "ANI");
         twobyte.put(0xFE, "CPI");
-        twobyte.put(0xDB, "IN");
+        twobyte.put(0xDB, "IN") ;
         twobyte.put(0x3E, "MVI A");
         twobyte.put(0x06, "MVI B");
         twobyte.put(0x0E, "MVI C");
@@ -260,14 +261,14 @@ public class Memory
     {
         threebyte = new HashMap<Integer, String>();
 
-        threebyte.put(0xCD, "CALL");
-        threebyte.put(0xDC, "CC"  );
-        threebyte.put(0xFC, "CM" );
+        threebyte.put(0xCD, "CALL" );
+        threebyte.put(0xDC, "CC"   );
+        threebyte.put(0xFC, "CM"  );
         threebyte.put(0xD4, "CNC");
         threebyte.put(0xC4, "CNZ");
         threebyte.put(0xF4, "CP");
-        threebyte.put(0xEC, "CPE");
-        threebyte.put(0xE4, "CPO");
+        threebyte.put(0xEC, "CPE") ;
+        threebyte.put(0xE4, "CPO") ;
         threebyte.put(0xCC, "CZ");
         threebyte.put(0xDA, "JC");
         threebyte.put(0xFA, "JM");
@@ -285,7 +286,7 @@ public class Memory
         threebyte.put(0x21, "LXI H");
         threebyte.put(0x31, "LXI SP");
         threebyte.put(0x22, "SHLD");
-        threebyte.put(0x32, "STA");
+        threebyte.put(0x32, "STA" );
     }
 
     public static HashMap<String, Short> REGISTER;
@@ -306,6 +307,6 @@ public class Memory
     private static final int MAXIOSIZE = 0x10000;
     public short[] RAM;
     public short[] IO;
-    public boolean[] FLAGS;//S Z A P C
+    public boolean[] FLAGS; //S Z A P C
     public int SP, PC;
 }

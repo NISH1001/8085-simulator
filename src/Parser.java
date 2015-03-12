@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.lang.String;
 
 public class Parser
 {
@@ -16,7 +17,8 @@ public class Parser
         //System.out.println(memory.onebyte.get(0));
         try
         {
-            BufferedReader reader = new BufferedReader( new FileReader(filename));
+            BufferedReader reader =
+                new BufferedReader( new FileReader(filename));
 
             String line;
 
@@ -43,6 +45,9 @@ public class Parser
                         line = line.substring(0, commentindex);
                         line = line.trim();
                     }
+                    
+                    line = line.toUpperCase();
+                    line  = ConvertToHex(line);
 
                     //now split the line by spaces
                     String[] splitted = line.split("\\s");
@@ -74,7 +79,7 @@ public class Parser
                         splitted[i] = splitted[i].toUpperCase();
                         try
                         {
-                            if(!splitted[i].matches("[0-9A-F][0-9A-F]"))
+                            if(!splitted[i].matches("([0-9A-F][0-9A-F])|([0-9A-F])"))
                             {
                                 String error = "Invalid code -> " + splitted[i] + " :: in line -> " + line;
                                 throw new ParseException(error);
@@ -162,6 +167,85 @@ public class Parser
         }
 
         return true;
+    }
+
+    // convert the line to our primitive hex code
+    public String ConvertToHex(String line)
+    {
+        //first iterate over onebyte instruction
+        Iterator <Map.Entry<Integer, String>> iter = memory.onebyte.entrySet().iterator();
+
+        //for converted line into hexcode
+        String converted = line;
+        boolean matched = false;
+
+        //loop through onebyte insturction
+        while(iter.hasNext())
+        {
+            Map.Entry<Integer, String> opcode = iter.next();
+            String hexcode = Integer.toHexString(opcode.getKey());
+            String engcode = opcode.getValue();
+
+            //search for substring like MOV A,B
+            matched = line.toUpperCase().contains(engcode.toUpperCase());
+
+            //if line contains instruction then replace with hex value
+            if(matched)
+            {
+                converted = line.replaceAll(engcode, hexcode);
+                break;
+            }
+        }
+
+        //if one byte instruciton failed -> do same for two byte instruction
+        if(!matched)
+        {
+            iter = memory.twobyte.entrySet().iterator();
+
+            while(iter.hasNext())
+            {
+                Map.Entry<Integer, String> opcode = iter.next();
+                String hexcode = Integer.toHexString(opcode.getKey());
+                String engcode = opcode.getValue();
+
+                //replae *,* with just a space
+                line = line.replaceAll("\\s*,\\s*", " ");
+                matched = line.toUpperCase().contains(engcode.toUpperCase());
+
+                if(matched)
+                {
+                    converted = line.replaceAll(engcode, hexcode);
+                    break;
+                }
+            }
+
+        }
+
+        //if two  byte instruciton failed -> do same for three  byte instruction
+        if(!matched)
+        {
+            iter = memory.threebyte.entrySet().iterator();
+
+            while(iter.hasNext())
+            {
+                Map.Entry<Integer, String> opcode = iter.next();
+                String hexcode = Integer.toHexString(opcode.getKey());
+                String engcode = opcode.getValue();
+
+                //replae *,* with just a space
+                line = line.replaceAll("\\s*,\\s*", " ");
+                matched = line.toUpperCase().contains(engcode.toUpperCase());
+
+                if(matched)
+                {
+                    converted = line.replaceAll(engcode, hexcode);
+                    break;
+                }
+            }
+
+        }
+
+        return converted;
     }
 
     public Memory GetMemory()
