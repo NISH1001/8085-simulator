@@ -1,19 +1,27 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Processor {
 
     private ALU alu;
-    private Register a,b,c,d,e,h,l;
-    private Register pc,ir,mar,dr;
+    private HashMap<String,Register> registers;
     private ArrayList<Device> devices;
 
     public Processor() {
-        alu = new ALU(); a = new Register(8);
-        b = new Register(8); c = new Register(8);
-        d = new Register(8); e = new Register(8);
-        h = new Register(8); l = new Register(8);
-        pc = new Register(16); ir = new Register(8);
-        mar = new Register(16); dr = new Register(8);
+        alu = new ALU();
+        devices = new ArrayList<Device>();
+        registers = new HashMap<String,Register>();
+        registers.put("A",new Register(1));
+        registers.put("B",new Register(1));
+        registers.put("C",new Register(1));
+        registers.put("D",new Register(1));
+        registers.put("E",new Register(1));
+        registers.put("H",new Register(1));
+        registers.put("L",new Register(1));
+        registers.put("IR",new Register(1));
+        registers.put("DR",new Register(1));
+        registers.put("PC",new Register(2));
+        registers.put("MAR",new Register(2));
     }
 
     public void addDevice(Device d) {
@@ -47,7 +55,8 @@ public class Processor {
     }
 
     protected void fetch() {
-        ir.setFromInt(memRead(pc.getAsInt()));
+        registers.get("IR").setFromInt(memRead(
+                    registers.get("PC").getAsInt()));
     }
 
     public void run() {

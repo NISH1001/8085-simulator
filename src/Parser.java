@@ -49,7 +49,7 @@ public class Parser
                         line = line.substring(0, commentindex);
                         line = line.trim();
                     }
-                    
+
                     line = line.toUpperCase();
                     line  = ConvertToHex(line);
 
@@ -264,7 +264,7 @@ public class Parser
     //to write to memory
     public void WriteToMemory(MemoryModule mem, int start_addr)
     {
-       int i = 0 ; 
+       int i = 0;
        for(Short d : data)
        {
            mem.writeByte(start_addr+i, d);
