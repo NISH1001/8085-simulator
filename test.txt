@@ -1,6 +1,5 @@
 
 ;;sample test
-
 06 12 	;mvi b, 12h
 
 78 	;mov a,b
@@ -16,9 +15,7 @@ POP B
 
 MVI A, 12
 
-lxi b ,  12   34
-
-
+lxi b ,  12 34
 
 
 Ef  ; inx h

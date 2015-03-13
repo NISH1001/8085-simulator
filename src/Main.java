@@ -2,8 +2,7 @@ public class Main
 {
     public static void main(String[] args)
     {
-        //opcode object used by parser
-        //Opcode op = new Opcode();
+        //parser object
         Parser p = new Parser();
 
         MemoryModule memory = new MemoryModule(0x0000, 0x10000);
@@ -11,7 +10,7 @@ public class Main
         //if parser is successful get memory
         if(p.Initialize("test.txt"))
         {
-            //p.ShowData();
+            p.ShowData();
             p.WriteToMemory(memory, 0x8000);
         }
 

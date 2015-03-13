@@ -18,15 +18,13 @@ public class Parser
 
     public boolean Initialize(String filename)
     {
-        //System.out.println(opcode.onebyte.get(0));
         try
         {
-            BufferedReader reader =
-                new BufferedReader( new FileReader(filename));
+            BufferedReader reader = new BufferedReader( new FileReader(filename));
 
             String line;
-
-            int index = 0;
+            
+            int linenumber = 1;
             while((line = reader.readLine()) != null)
             {
                 //trim leading and trailing spaces
@@ -39,7 +37,10 @@ public class Parser
 
                     //if whole line is a comment
                     if(line.charAt(0) == ';')
+                    {
+                        linenumber++;
                         continue;
+                    }
 
                     //else if line has got some comments at its end
                     int commentindex = line.indexOf(';');
@@ -50,7 +51,10 @@ public class Parser
                         line = line.trim();
                     }
 
+                    String copy = line;                     
                     line = line.toUpperCase();
+                    
+                    //convert to hex opcodes
                     line  = ConvertToHex(line);
 
                     //now split the line by spaces
@@ -62,39 +66,20 @@ public class Parser
 
                     //im assuming we dont have a single instruction whose
                     //length is greater than 3 bytes
-                    try
+                    if(len > 3)
                     {
-                        if(len > 3)
-                        {
-                            throw new ParseException("Invalid insturcion line -> " + line);
-                        }
+                        throw new ParseException("Invalid insturcion line -> " + copy + " :: linenumber -> " + linenumber);
                     }
 
-                    catch(ParseException err)
-                    {
-                        System.out.println(err.getMessage());
-                        reader.close();
-                        return false;
-                    }
 
                     //now check for genuine characters after splitting
                     for(int i=0; i<len; ++i)
                     {
                         splitted[i] = splitted[i].toUpperCase();
-                        try
+                        if(!splitted[i].matches("([0-9A-F][0-9A-F])|([0-9A-F])"))
                         {
-                            if(!splitted[i].matches("([0-9A-F][0-9A-F])|([0-9A-F])"))
-                            {
-                                String error = "Invalid code -> " + splitted[i] + " :: in line -> " + line;
-                                throw new ParseException(error);
-                            }
-                        }
-
-                        catch(ParseException err)
-                        {
-                            System.out.println(err.getMessage());
-                            reader.close();
-                            return false;
+                            String error = "Invalid code -> " + splitted[i] + " :: in line -> " + copy + " :: linenumber -> " + linenumber ;
+                            throw new ParseException(error);
                         }
 
                         //convert to integer value if success
@@ -104,53 +89,26 @@ public class Parser
                     //if single byte instruction check if genuine opcode
                     if(len == 1)
                     {
-                        try
-                        {
-                            if((opcode.onebyte.get((int)codes[0])) == null)
-                                throw new ParseException("Invalid onebyte instruction -> " + line);
-                        }
+                        if((opcode.onebyte.get((int)codes[0])) == null)
+                            throw new ParseException("Invalid insturcion line -> " + copy + " :: linenumber -> " + linenumber);
 
-                        catch(ParseException err)
-                        {
-                            System.out.println(err.getMessage());
-                            reader.close();
-                            return false;
-                        }
 
                     }
 
                     //if two byte instruction check if genuine opcode
                     if(len == 2)
                     {
-                        try
-                        {
-                            if(opcode.twobyte.get((int)codes[0]) == null)
-                                throw new ParseException("Invalid twobyte instruction -> " + line);
-                        }
+                        if(opcode.twobyte.get((int)codes[0]) == null)
+                            throw new ParseException("Invalid insturcion line -> " + copy + " :: linenumber -> " + linenumber);
 
-                        catch(ParseException err)
-                        {
-                            System.out.println(err.getMessage());
-                            reader.close();
-                            return false;
-                        }
                     }
 
                     //if three byte instructon check if genuine opcode
                     if(len == 3)
                     {
-                        try
-                        {
-                            if(opcode.threebyte.get((int)codes[0]) == null)
-                                throw new ParseException("Invalid threebyte instruction -> " + line);
-                        }
+                        if(opcode.threebyte.get((int)codes[0]) == null)
+                            throw new ParseException("Invalid insturcion line -> " + copy + " :: linenumber -> " + linenumber);
 
-                        catch(ParseException err)
-                        {
-                            System.out.println(err.getMessage());
-                            reader.close();
-                            return false;
-                        }
                     }
 
                     //if everthing is success store into RAM
@@ -160,6 +118,7 @@ public class Parser
                     }
 
                 }
+                ++linenumber;
             }
 
             reader.close();
@@ -167,6 +126,12 @@ public class Parser
         }
         catch ( IOException e)
         {
+            return false;
+        }
+
+        catch (ParseException err)
+        {
+            System.out.println(err.getMessage());
             return false;
         }
 
