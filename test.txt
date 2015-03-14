@@ -1,13 +1,9 @@
-
 ;;sample test
 06 12 	;mvi b, 12h
-
-78 	;mov a,b
+L1 : 01 12 34
+L1 : 3E  12 
 
 01 12    34 ;lxi b, 1234h
-
-;inr a
-3c
 
 MOV B,C
 
@@ -17,7 +13,7 @@ MVI A, 12
 
 lxi b ,  12 34
 
+JMP L1
 
-Ef  ; inx h
-
+Ef  
 

@@ -8,23 +8,49 @@ public class Parser
     private Opcode opcode;
 
     //to store the parsed hexcodes
-    private ArrayList<Short> data;
+    private ArrayList<Integer> data;
+
+    //store m_label and their correspoinding address
+    private HashMap<String,Integer> m_label;
+
+    //store lines to be used in second pass
+    private HashMap<Integer,String> m_parsedLines;
+
+    //m_offset for m_labels
+    private int m_offset;
 
     public Parser()
     {
-        data = new ArrayList<Short>();
+        m_offset = (int)0;
+        m_parsedLines = new HashMap<Integer,String>();
+        m_label = new HashMap<String, Integer>();
+        data = new ArrayList<Integer>();
         opcode = new Opcode();
     }
 
-    public boolean Initialize(String filename)
+    public boolean Initialize(String filename, int start_addr)
     {
+        boolean first = FirstPass(filename, start_addr);
+        if(!first)
+            return false;
+
+        boolean second = SecondPass();
+        if(!second)
+            return false;
+        return true;
+    }
+
+
+    public boolean FirstPass(String filename, int start_address)
+    {
+        int start_addr = (int)start_address;
+        int linenumber = 1;
         try
         {
             BufferedReader reader = new BufferedReader( new FileReader(filename));
 
             String line;
 
-            int linenumber = 1;
             while((line = reader.readLine()) != null)
             {
                 //trim leading and trailing spaces
@@ -39,6 +65,8 @@ public class Parser
                     if(line.charAt(0) == ';')
                     {
                         linenumber++;
+                        line = line.substring(0, 1);
+                        m_parsedLines.put(linenumber, line);
                         continue;
                     }
 
@@ -56,79 +84,68 @@ public class Parser
 
                     //convert to hex opcodes
                     line  = ConvertToHex(line);
+                    String label = "";
 
-                    //now split the line by spaces
-                    String[] splitted = line.split("\\s");
-                    int len = splitted.length;
-
-                    //to store codes as integers -> short = 16bit
-                    short[] codes = new short[len];
-
-                    //im assuming we dont have a single instruction whose
-                    //length is greater than 3 bytes
-                    if(len > 3)
+                    //check if there is a label
+                    if(line.indexOf(":")>0)
                     {
-                        throw new ParseException("Invalid insturcion line -> " + copy + " :: linenumber -> " + linenumber);
-                    }
+                        String[] labelsplitted = line.split(":");
+                        String l1 = labelsplitted[0].trim();
+                        String l2 = labelsplitted[1].trim();
 
-
-                    //now check for genuine characters after splitting
-                    for(int i=0; i<len; ++i)
-                    {
-                        splitted[i] = splitted[i].toUpperCase();
-                        if(!splitted[i].matches("([0-9A-F][0-9A-F])|([0-9A-F])"))
+                        if(!l1.matches("[A-Z][0-9A-Z]*"))
                         {
-                            String error = "Invalid code -> " + splitted[i] + " :: in line -> " + copy + " :: linenumber -> " + linenumber ;
-                            throw new ParseException(error);
+                            throw new ParseException("Invalid label in line -> " + copy + " :: linenumber -> " + linenumber);
                         }
-
-                        //convert to integer value if success
-                        codes[i] = Short.parseShort(splitted[i],16);
+                        label = l1;
+                        line = l2;
                     }
 
-                    //if single byte instruction check if genuine opcode
-                    if(len == 1)
+                    // get the opcode -> first byte of our line is always an opcode
+                    String op = (line.split(" "))[0];
+                    int code = Integer.parseInt(op,16);
+                    int off = m_offset;
+
+                    //to calculate offset increment
+                    if(opcode.onebyte.get(code) != null)
                     {
-                        if((opcode.onebyte.get((int)codes[0])) == null)
-                            throw new ParseException("Invalid insturcion line -> " + copy + " :: linenumber -> " + linenumber);
-
-
+                        m_offset++;
                     }
-
-                    //if two byte instruction check if genuine opcode
-                    if(len == 2)
+                    if(opcode.twobyte.get(code) != null)
                     {
-                        if(opcode.twobyte.get((int)codes[0]) == null)
-                            throw new ParseException("Invalid insturcion line -> " + copy + " :: linenumber -> " + linenumber);
-
+                        m_offset += 2;
                     }
-
-                    //if three byte instructon check if genuine opcode
-                    if(len == 3)
+                    if(opcode.threebyte.get(code) != null)
                     {
-                        if(opcode.threebyte.get((int)codes[0]) == null)
-                            throw new ParseException("Invalid insturcion line -> " + copy + " :: linenumber -> " + linenumber);
-
+                        m_offset += 3;
                     }
 
-                    //if everthing is success store into RAM
-                    for(int i=0; i<len; ++i)
+                    if(m_label.get(label) != null && label.length()>0)
                     {
-                        data.add(codes[i]);
+                        throw new ParseException("possible label duplication :: " + copy + " :: line ->" + linenumber);
                     }
 
+                    m_label.put(label, start_addr + off);
+
+                    //System.out.println(start_addr + m_offset + line);
                 }
+
+                m_parsedLines.put(linenumber, line);
+                //System.out.println(m_parsedLines.get(linenumber));
                 ++linenumber;
             }
 
             reader.close();
-
         }
         catch ( IOException e)
         {
             return false;
         }
-
+        catch (NumberFormatException e)
+        {
+            System.out.println("invalid line : " + linenumber);
+            return false;
+        }
         catch (ParseException err)
         {
             System.out.println(err.getMessage());
@@ -136,6 +153,136 @@ public class Parser
         }
 
         return true;
+    }
+
+    public boolean SecondPass()
+    {
+        try
+        {
+            Iterator <Map.Entry<Integer, String>> iter = m_parsedLines.entrySet().iterator();
+            while(iter.hasNext())
+            {
+                Map.Entry<Integer, String> lineiter = iter.next();
+                int linenumber = lineiter.getKey();
+                String  line = lineiter.getValue();
+
+                if(line.length() == 0)
+                {
+                    continue;
+                }
+
+                line = SubstituteLabel(line);
+
+                //now split the line by spaces
+                String[] splitted = line.split("\\s");
+                int len = splitted.length;
+
+                //to store codes as integers -> int = 16bit
+                int[] codes = new int[len];
+
+                //im assuming we dont have a single instruction whose
+                //length is greater than 3 bytes
+                if(len > 3)
+                {
+                    throw new ParseException("Invalid insturcion line -> " + line + " :: linenumber -> " + linenumber);
+                }
+
+
+                //now check for genuine characters after splitting
+                for(int i=0; i<len; ++i)
+                {
+                    splitted[i] = splitted[i].toUpperCase();
+                    if(!splitted[i].matches("([0-9A-F][0-9A-F])|([0-9A-F])"))
+                    {
+                        String error = "Invalid code -> " + splitted[i] + " :: in line -> " + line + " :: linenumber -> " + linenumber ;
+                        throw new ParseException(error);
+                    }
+
+                    //convert to integer value if success
+                    codes[i] = Integer.parseInt(splitted[i],16);
+                }
+
+                //if single byte instruction check if genuine opcode
+                if(len == 1)
+                {
+                    if((opcode.onebyte.get((int)codes[0])) == null)
+                        throw new ParseException("Invalid insturcion line -> " + line  + " :: linenumber -> " + linenumber);
+
+
+                }
+
+                //if two byte instruction check if genuine opcode
+                if(len == 2)
+                {
+                    if(opcode.twobyte.get((int)codes[0]) == null)
+                        throw new ParseException("Invalid insturcion line -> " + line + " :: linenumber -> " + linenumber);
+
+                }
+
+                //if three byte instructon check if genuine opcode
+                if(len == 3)
+                {
+                    if(opcode.threebyte.get((int)codes[0]) == null)
+                        throw new ParseException("Invalid insturcion line -> " + line + " :: linenumber -> " + linenumber);
+
+                }
+
+                //if everthing is success store into RAM
+                for(int i=0; i<len; ++i)
+                {
+                    data.add(codes[i]);
+                }
+
+            }
+
+        }
+        catch (ParseException err)
+        {
+            System.out.println(err.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    //to substitute label by address
+    public String SubstituteLabel(String line)
+    {
+        Iterator <Map.Entry<String, Integer>> iter = m_label.entrySet().iterator();
+
+        boolean matched = false;
+        String converted = line;
+
+        while(iter.hasNext())
+        {
+            Map.Entry<String, Integer> labeliter = iter.next();
+            String label = labeliter.getKey();
+            if(label.length() == 0)
+                continue;
+
+            Integer label_addr = labeliter.getValue();
+
+            matched = line.contains(label);
+
+            //if line contains a label
+            if(matched)
+            {
+                //convert integer address to hex string
+                String hexcode = Integer.toHexString(label_addr);
+                int len = hexcode.length();
+                String temp = "";
+
+                //add leading zeros to maximum length -> 4 for now
+                for(int i=0; i<(4-len); ++i)
+                {
+                    temp += "0";
+                }
+
+                hexcode = temp + hexcode;
+                hexcode = hexcode.charAt(0) + "" + hexcode.charAt(1) + " " + hexcode.charAt(2) + ""  + hexcode.charAt(3);
+                converted = line.replaceAll(label, hexcode);
+            }
+        }
+        return converted;
     }
 
     // convert the line to our primitive hex code
@@ -220,7 +367,7 @@ public class Parser
     //to show parsed data
     public void ShowData()
     {
-        for (Short d : data)
+        for (Integer d : data)
         {
             System.out.println(Integer.toHexString(d));
         }
@@ -229,11 +376,11 @@ public class Parser
     //to write to memory
     public void WriteToMemory(MemoryModule mem, int start_addr)
     {
-        int i = 0;
-        for(Short d : data)
-        {
-            mem.writeByte(start_addr+i, d);
-            i++;
-        }
+       int i = 0;
+       for(Integer d : data)
+       {
+           //mem.writeByte(start_addr+i, d);
+           i++;
+       }
     }
 }
