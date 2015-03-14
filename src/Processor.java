@@ -28,27 +28,27 @@ public class Processor {
         devices.add(d);
     }
 
-    protected byte memRead(int address) {
+    protected short memRead(int address) {
         for (Device d : devices)
             if (!d.IO_Mbar() && d.hasAddress(address))
                 return d.readByte(address);
-        return (byte)0x00;
+        return (short)0x00;
     }
 
-    protected byte ioRead(int address) {
+    protected short ioRead(int address) {
         for (Device d : devices)
             if (d.IO_Mbar() && d.hasAddress(address))
                 return d.readByte(address);
-        return (byte)0x00;
+        return (short)0x00;
     }
 
-    protected void memWrite(int address, byte b) {
+    protected void memWrite(int address, short b) {
         for (Device d : devices)
             if (!d.IO_Mbar() && d.hasAddress(address))
                 d.writeByte(address,(int)b);
     }
 
-    protected void ioWrite(int address, byte b) {
+    protected void ioWrite(int address, short b) {
         for (Device d : devices)
             if (d.IO_Mbar() && d.hasAddress(address))
                 d.writeByte(address,(int)b);
@@ -59,6 +59,44 @@ public class Processor {
                     registers.get("PC").getAsInt()));
     }
 
+    protected Register getRegFromCode(int code) {
+        if (code==0)
+            return registers.get("B");
+        else if (code==1)
+            return registers.get("C");
+        else if (code==2)
+            return registers.get("D");
+        else if (code==3)
+            return registers.get("E");
+        else if (code==4)
+            return registers.get("H");
+        else if (code==5)
+            return registers.get("L");
+        else if (code==6)
+            return registers.get("M");
+        else if (code==7)
+            return registers.get("A");
+        else
+            return new Register(1);
+    }
+
+    protected void regMov(int dest, int src) {
+        getRegFromCode(dest).setFromReg(getRegFromCode(src));
+    }
+
     public void run() {
+        while (true) {
+            fetch();
+
+            boolean[] irBits = registers.get("IR").getAsBool();
+            Register ir = registers.get("IR");
+
+            // If starts with 01, it is a MOV instruction
+            if (!irBits[7] && irBits[6]) {
+                int dst = ir.getBitrangeAsInt(3,5);
+                int src = ir.getBitrangeAsInt(0,2);
+                regMov(dst,src);
+            }
+        }
     }
 }

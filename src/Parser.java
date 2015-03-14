@@ -23,7 +23,7 @@ public class Parser
             BufferedReader reader = new BufferedReader( new FileReader(filename));
 
             String line;
-            
+
             int linenumber = 1;
             while((line = reader.readLine()) != null)
             {
@@ -51,9 +51,9 @@ public class Parser
                         line = line.trim();
                     }
 
-                    String copy = line;                     
+                    String copy = line;
                     line = line.toUpperCase();
-                    
+
                     //convert to hex opcodes
                     line  = ConvertToHex(line);
 
@@ -229,11 +229,11 @@ public class Parser
     //to write to memory
     public void WriteToMemory(MemoryModule mem, int start_addr)
     {
-       int i = 0;
-       for(Short d : data)
-       {
-           mem.writeByte(start_addr+i, d);
-           i++;
-       }
+        int i = 0;
+        for(Short d : data)
+        {
+            mem.writeByte(start_addr+i, d);
+            i++;
+        }
     }
 }

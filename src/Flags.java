@@ -1,52 +1,52 @@
 public class Flags extends Register {
 
     public Flags() {
-        super((short)8);
+        super((short)1);
     }
 
     public boolean getFlag(String flag) {
         if (flag=="carry")
-            return data[0];
+            return getBit(0);
         else if (flag=="parity")
-            return data[1];
+            return getBit(1);
         else if (flag=="auxcarry")
-            return data[3];
+            return getBit(3);
         else if (flag=="zero")
-            return data[5];
+            return getBit(5);
         else if (flag=="sign")
-            return data[7];
+            return getBit(7);
         else
             return false;
     }
 
     public void setFlag(String flag, boolean value) {
         if (flag=="carry")
-            data[0] = value;
+            setBit(0,value);
         else if (flag=="parity")
-            data[1] = value;
+            setBit(1,value);
         else if (flag=="auxcarry")
-            data[3] = value;
+            setBit(3,value);
         else if (flag=="zero")
-            data[5] = value;
+            setBit(5,value);
         else if (flag=="sign")
-            data[7] = value;
+            setBit(7,value);
     }
 
-    public byte adjust(int result) {
-        byte res = (byte)(0xFF & result);
+    public short adjust(int result) {
+        short res = (short)(0xFF & result);
         if (result==0)
-            data[5]=true;
+            setBit(5,true);
         else if (result>0x7f)
-            data[7]=true;
+            setBit(7,true);
         if (result>res)
-            data[0]=true;
+            setBit(0,true);
         boolean parity = false;
         while (result!=0) {
             if (result%2==1)
                 parity=!parity;
             result/=2;
         }
-        data[1] = parity;
+        setBit(1,parity);
         return res;
     }
 }

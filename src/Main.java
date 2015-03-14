@@ -1,8 +1,7 @@
 public class Main
 {
     public static void main(String[] args)
-    {
-        //parser object
+    { //parser object
         Parser p = new Parser();
 
         MemoryModule memory = new MemoryModule(0x0000, 0x10000);
@@ -16,5 +15,4 @@ public class Main
 
         System.out.println(memory.readByte(0x8001));
    }
-
 }

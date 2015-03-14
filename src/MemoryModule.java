@@ -1,12 +1,12 @@
 public class MemoryModule implements Device {
 
     private short start_addr,addr_size;
-    private byte data[];
+    private short data[];
 
     public MemoryModule(int start, int size) {
         start_addr = (short)start;
         addr_size = (short)size;
-        data = new byte[size];
+        data = new short[size];
     }
 
     public boolean hasAddress(int address) {
@@ -21,10 +21,10 @@ public class MemoryModule implements Device {
     }
 
     public void writeByte(int address, int databyte) {
-        data[address-start_addr] = (byte)databyte;
+        data[address-start_addr] = (short)databyte;
     }
 
-    public byte readByte(int address) {
+    public short readByte(int address) {
         return data[address-start_addr];
    }
 }
