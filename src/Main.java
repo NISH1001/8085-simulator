@@ -11,6 +11,8 @@ public class Main
         //if parser is successful get memory
         if(p.Initialize("test.txt", start_addr))
         {
+            p.ShowOriginalLines();
+            System.out.println("--------------------------");
             p.ShowData();
             p.WriteToMemory(memory, 0x8000);
         }

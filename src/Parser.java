@@ -16,6 +16,8 @@ public class Parser
     //store lines to be used in second pass
     private HashMap<Integer,String> m_parsedLines;
 
+    private ArrayList<String> m_originalLines;
+
     //m_offset for m_labels
     private int m_offset;
 
@@ -25,6 +27,7 @@ public class Parser
         m_parsedLines = new HashMap<Integer,String>();
         m_label = new HashMap<String, Integer>();
         data = new ArrayList<Integer>();
+        m_originalLines = new ArrayList<String>();
         opcode = new Opcode();
     }
 
@@ -44,17 +47,18 @@ public class Parser
     public boolean FirstPass(String filename, int start_address)
     {
         int start_addr = (int)start_address;
-        int linenumber = 1;
+        int linenumber = 0; 
+        String line = new String();
         try
         {
             BufferedReader reader = new BufferedReader( new FileReader(filename));
 
-            String line;
-            
             while((line = reader.readLine()) != null)
             {
                 //trim leading and trailing spaces
+                String copy = line;                     
                 line = line.trim();
+                ++linenumber;
 
                 if(line.length()>0)
                 {
@@ -64,9 +68,8 @@ public class Parser
                     //if whole line is a comment
                     if(line.charAt(0) == ';')
                     {
-                        linenumber++;
-                        line = line.substring(0, 1);
-                        m_parsedLines.put(linenumber, line);
+                        m_parsedLines.put(linenumber, "");
+                        m_originalLines.add( copy );
                         continue;
                     }
 
@@ -79,7 +82,6 @@ public class Parser
                         line = line.trim();
                     }
 
-                    String copy = line;                     
                     line = line.toUpperCase();
                     
                     //convert to hex opcodes
@@ -92,6 +94,11 @@ public class Parser
                         String[] labelsplitted = line.split(":");
                         String l1 = labelsplitted[0].trim();
                         String l2 = labelsplitted[1].trim();
+
+                        if(l1.indexOf(" ")>0)
+                        {
+                            throw new ParseException("Label must not contain spaces -> " + copy + " :: linenumber -> " + linenumber);
+                        }
 
                         if(!l1.matches("[A-Z][0-9A-Z]*"))
                         {
@@ -126,24 +133,22 @@ public class Parser
                     }
 
                     m_label.put(label, start_addr + off);
-
-                    //System.out.println(start_addr + m_offset + line);
                 }
                 
                 m_parsedLines.put(linenumber, line);
-                //System.out.println(m_parsedLines.get(linenumber));
-                ++linenumber;
+                m_originalLines.add(copy);
             }
 
             reader.close();
         }
         catch ( IOException e)
         {
+            System.out.println("invalid file");
             return false;
         }
         catch (NumberFormatException e)
         {
-            System.out.println("invalid line : " + linenumber);
+            System.out.println("invalid line -> " + line + " :: " + "linenumber -> " + linenumber);
             return false;
         }
         catch (ParseException err)
@@ -151,7 +156,6 @@ public class Parser
             System.out.println(err.getMessage());
             return false;
         }
-
         return true;
     }
 
@@ -159,17 +163,17 @@ public class Parser
     {
         try
         {
-            Iterator <Map.Entry<Integer, String>> iter = m_parsedLines.entrySet().iterator();
-            while(iter.hasNext())
+            int linenumber = 0;
+            while(linenumber < m_parsedLines.size())
             {
-                Map.Entry<Integer, String> lineiter = iter.next();
-                int linenumber = lineiter.getKey();
-                String  line = lineiter.getValue();
+                linenumber++;
+
+                String original = m_originalLines.get(linenumber-1);
+
+                String line = m_parsedLines.get(linenumber);
 
                 if(line.length() == 0)
-                {
                     continue;
-                }
 
                 line = SubstituteLabel(line);
 
@@ -184,7 +188,7 @@ public class Parser
                 //length is greater than 3 bytes
                 if(len > 3)
                 {
-                    throw new ParseException("Invalid insturcion line -> " + line + " :: linenumber -> " + linenumber);
+                    throw new ParseException("Invalid insturcion line -> " + original + " :: linenumber -> " + linenumber);
                 }
 
 
@@ -194,7 +198,7 @@ public class Parser
                     splitted[i] = splitted[i].toUpperCase();
                     if(!splitted[i].matches("([0-9A-F][0-9A-F])|([0-9A-F])"))
                     {
-                        String error = "Invalid code -> " + splitted[i] + " :: in line -> " + line + " :: linenumber -> " + linenumber ;
+                        String error = "Invalid code -> " + splitted[i] + " :: in line -> " + original + " :: linenumber -> " + linenumber ;
                         throw new ParseException(error);
                     }
 
@@ -206,8 +210,7 @@ public class Parser
                 if(len == 1)
                 {
                     if((opcode.onebyte.get((int)codes[0])) == null)
-                        throw new ParseException("Invalid insturcion line -> " + line  + " :: linenumber -> " + linenumber);
-
+                        throw new ParseException("Invalid insturcion line -> " + original+ " :: linenumber -> " + linenumber);
 
                 }
 
@@ -215,7 +218,7 @@ public class Parser
                 if(len == 2)
                 {
                     if(opcode.twobyte.get((int)codes[0]) == null)
-                        throw new ParseException("Invalid insturcion line -> " + line + " :: linenumber -> " + linenumber);
+                        throw new ParseException("Invalid insturcion line -> " + original + " :: linenumber -> " + linenumber);
 
                 }
 
@@ -223,7 +226,7 @@ public class Parser
                 if(len == 3)
                 {
                     if(opcode.threebyte.get((int)codes[0]) == null)
-                        throw new ParseException("Invalid insturcion line -> " + line + " :: linenumber -> " + linenumber);
+                        throw new ParseException("Invalid insturcion line -> " + original+ " :: linenumber -> " + linenumber);
 
                 }
 
@@ -232,10 +235,9 @@ public class Parser
                 {
                     data.add(codes[i]);
                 }
-
             }
-
         }
+
         catch (ParseException err)
         {
             System.out.println(err.getMessage());
@@ -249,7 +251,6 @@ public class Parser
     {
         Iterator <Map.Entry<String, Integer>> iter = m_label.entrySet().iterator();
 
-        boolean matched = false;
         String converted = line;
 
         while(iter.hasNext())
@@ -261,24 +262,22 @@ public class Parser
 
             Integer label_addr = labeliter.getValue();
 
-            matched = line.contains(label);
+            int index = line.indexOf(label);
             
             //if line contains a label
-            if(matched)
+            if(index>0 && line.charAt(index-1)==' ')
             {
                 //convert integer address to hex string
                 String hexcode = Integer.toHexString(label_addr);
                 int len = hexcode.length();
-                String temp = "";
 
-                //add leading zeros to maximum length -> 4 for now
-                for(int i=0; i<(4-len); ++i)
-                {
-                    temp += "0";
-                }
+                //to fill with zeroes -> filling is faster than loop
+                char[] z = new char[4-len];
+                Arrays.fill(z, '0');
+                String temp = new String(z);
 
                 hexcode = temp + hexcode;
-                hexcode = hexcode.charAt(0) + "" + hexcode.charAt(1) + " " + hexcode.charAt(2) + ""  + hexcode.charAt(3);
+                hexcode = hexcode.substring(0,2) + " " + hexcode.substring(2,4);
                 converted = line.replaceAll(label, hexcode);
             }
         }
@@ -362,6 +361,14 @@ public class Parser
         }
 
         return converted;
+    }
+
+    public void ShowOriginalLines()
+    {
+        for(String o : m_originalLines)
+        {
+            System.out.println(o);
+        }
     }
 
     //to show parsed data
