@@ -129,7 +129,11 @@ public class HelloWorld extends Application {
                     static Label registerSP2value = new Label("00") ;
                     
     //PPi label
-        
+                    static Label ppiCWvalue = new Label("00") ;
+                    static Label ppiPAvalue = new Label("00");
+                    static Label ppiPBvalue = new Label("00");
+                    static Label ppiPCvalue = new Label("00");
+
 
     
     @Override
@@ -170,34 +174,82 @@ public class HelloWorld extends Application {
                 editorframe.setPadding(new Insets(10,10,10,10));
 
                 //tabs
-                Tab editor_tab = new Tab("Editor") ;
+                Tab editor_tab = new Tab("              Editor                                ") ;
                 editor_tab.setClosable(false);
-                Tab hexeditor_tab = new Tab("Hex") ;
+                Tab hexeditor_tab = new Tab("              Hex                                ") ;
                 hexeditor_tab.setClosable(false);
 
                 //vbox for both
                 VBox editor_tab_box = new VBox() ;
                 editor_tab_box.setSpacing(10);
+                
                 VBox hexeditor_tab_box = new VBox() ;
                 hexeditor_tab_box.setMinHeight(800);
                 hexeditor_tab_box.setSpacing(10);
-
+                
+                HBox editor_button_box = new HBox() ;
+                HBox hexeditor_button_box = new HBox() ;
+                editor_button_box.setSpacing(10);
+                hexeditor_button_box.setSpacing(10);
+                
                 //textarea
                 TextArea editor = new TextArea() ;
                 TextArea hexeditor = new TextArea() ;
                 
                 Button editor_run = new Button("RUN") ;
                 Button hexeditor_run = new Button("RUN") ;
+                Button editor_run_step = new Button("Step") ;
+                Button hexeditor_run_step = new Button("Step") ;
+                Button editor_run_step_next = new Button("Next") ;
+                Button hexeditor_run_step_next = new Button("Next") ;
+                Button editor_run_step_prev = new Button("Previous") ;
+                Button hexeditor_run_step_prev = new Button("Previous") ;
+                
                 
                 editor.setMinHeight(400);
                 hexeditor.setMinHeight(400);
                 
+                editor_run_step_next.setVisible(false);
+                editor_run_step_prev.setVisible(false);
+                hexeditor_run_step_next.setVisible(false);
+                hexeditor_run_step_prev.setVisible(false);
+                
                 editor_run.setOnAction(e-> {});
                 hexeditor_run.setOnAction(e-> {});
-
+                editor_run_step.setOnAction(e->{
+                    editor_run_step_next.setVisible(true);
+                    editor_run_step_prev.setVisible(true);
+                    //other method here ..loading to memory kind of stuff
+                }) ;
+                hexeditor_run_step.setOnAction(e->{
+                    hexeditor_run_step_next.setVisible(true);
+                    hexeditor_run_step_prev.setVisible(true);
+                    //other method here ..loading to memory kind of stuff
+                }) ;
+                editor_run_step_next.setOnAction(e->{
+                    if(true){//end of execution
+                        editor_run_step_next.setVisible(false);
+                        editor_run_step_prev.setVisible(false);
+                    }else{
+                        
+                    }
+                });
+                hexeditor_run_step_next.setOnAction(e->{
+                    if(true){//end of execution
+                        hexeditor_run_step_next.setVisible(false);
+                        hexeditor_run_step_prev.setVisible(false);
+                    }else{
+                        
+                    }
+                });
+                editor_run_step_prev.setOnAction(e->{});
+                hexeditor_run_step_prev.setOnAction(e->{});
+                
+                editor_button_box.getChildren().addAll(editor_run,editor_run_step,editor_run_step_prev,editor_run_step_next);
+                hexeditor_button_box.getChildren().addAll(hexeditor_run,hexeditor_run_step,hexeditor_run_step_prev,hexeditor_run_step_next);
 //        editor.setMinHeight(500);
-                editor_tab_box.getChildren().addAll(editor,editor_run) ;
-                hexeditor_tab_box.getChildren().addAll(hexeditor,hexeditor_run) ;
+                editor_tab_box.getChildren().addAll(editor,editor_button_box) ;
+                hexeditor_tab_box.getChildren().addAll(hexeditor,hexeditor_button_box) ;
                 
                 editor_tab.setContent(editor_tab_box);
                 hexeditor_tab.setContent(hexeditor_tab_box);
@@ -363,12 +415,12 @@ public class HelloWorld extends Application {
            VBox registergeneral = new VBox() ;
                    Label registerLabel = new Label("Registers") ;
                  registergeneral.setSpacing(10);
-                 registergeneral.getStyleClass().add("registershow");        
+                 registergeneral.getStyleClass().add("registerinnershow");        
                  
             VBox registerflag = new VBox() ;
                    Label registerflagLabel = new Label("Flag") ;
                  registerflag.setSpacing(10);
-                 registerflag.getStyleClass().add("registershow");        
+                 registerflag.getStyleClass().add("registerinnershow");        
                  
                  
                 //general register
@@ -460,9 +512,25 @@ public class HelloWorld extends Application {
             
             //final register panel General register and flags
                 registerframeMain.getChildren().addAll(registergeneral,registerflag) ;
-            
+         //PPI 
+                VBox ppi_main_box = new VBox();
+                ppi_main_box.setPadding(new Insets(10,10,10,10));
+                ppi_main_box.getStyleClass().add("IOshow") ;
+
+                HBox ppi_box = new HBox() ;
+                ppi_box.getStyleClass().add("IOinnershow") ;
+                VBox ppilabel_box = new VBox() ;
+                VBox ppivalue_box = new VBox() ;
+                
+                
+                ppilabel_box.getChildren().addAll(new Label("Control Word") ,new Label("Port A") ,new Label("Port B"), new Label("Port C") );
+                ppivalue_box.getChildren().addAll(ppiCWvalue,ppiPAvalue,ppiPBvalue,ppiPCvalue);
+                
+                ppi_box.getChildren().addAll(ppilabel_box,ppivalue_box) ;
+                ppi_main_box.getChildren().addAll(new Label("PPI") , ppi_box);
         //final left panel
         registerframe.add(registerframeMain, 0,0);
+        registerframe.add(ppi_main_box, 0,1);
         
        
         
@@ -500,7 +568,7 @@ public class HelloWorld extends Application {
     
     static void memory_table_update(int start_address){
         memory_data.clear();
-        for(int i = start_address ; i < start_address+30 ; i++){
+        for(int i = start_address ; i < start_address+60 ; i++){
             memory_data.add(new memorytableView( Integer.toString(i) , Integer.toHexString((int)memory.readByte(i))) ) ;
         }
         
@@ -508,7 +576,7 @@ public class HelloWorld extends Application {
     
     static void IO_table_update(int start_address){
         IO_data.clear();
-        for(int i = start_address ; i < start_address+30 ; i++){
+        for(int i = start_address ; i < start_address+60 ; i++){
             IO_data.add(new memorytableView( Integer.toString(i) , Integer.toHexString((int)memory.readByte(i))) ) ;
         }
         

@@ -33,13 +33,20 @@ public class alertBox {
        Label list_title = new Label("Our Team");
        Label list = new Label("Najma Mathema \n Navin Ayer \n Nishan Patha \n Neeraj Adhikari");
        Button backButton = new Button("Back") ;
+       header.getStyleClass().addAll("about_border","white_text") ;
+       disc.getStyleClass().add("white_text") ;
+       list_title.getStyleClass().add("white_text") ;
+       list.getStyleClass().add("white_text") ;
+
        backButton.setOnAction(e -> window.close());
        
        VBox layout = new VBox(10) ;
        layout.getChildren().addAll(header, disc , list_title , list,backButton) ;
+       layout.getStyleClass().add("about_border") ;
        layout.setAlignment(Pos.CENTER);
        
-       scene = new Scene(layout,300,300);
+       scene = new Scene(layout,600,600);
+       scene.getStylesheets().add("helloworld/general.css");       
        window.setScene(scene);
        window.showAndWait();
        

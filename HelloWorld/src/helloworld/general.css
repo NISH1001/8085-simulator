@@ -23,6 +23,18 @@ and open the template in the editor.
     -fx-vgap: 10;
 }
 
+.registerinnershow {
+/*    -fx-background-image: url("graphics/arrow_t_up_right.png");
+    -fx-background-size: 96, 205;
+    -fx-background-repeat: no-repeat;*/
+    -fx-border-color: #2e8b57;
+    -fx-border-width: 2px;
+    -fx-padding: 10;
+    -fx-spacing: 8;
+    -fx-background-color: #CCCCAA;
+
+}
+
 .registershow {
 /*    -fx-background-image: url("graphics/arrow_t_up_right.png");
     -fx-background-size: 96, 205;
@@ -31,7 +43,51 @@ and open the template in the editor.
     -fx-border-width: 2px;
     -fx-padding: 10;
     -fx-spacing: 8;
-    -fx-background-color: #7be438f4;
+    -fx-background-color: #CCCCCC;
+
+}
+
+
+.about_border {
+/*    -fx-background-image: url("graphics/arrow_t_up_right.png");
+    -fx-background-size: 96, 205;
+    -fx-background-repeat: no-repeat;*/
+    -fx-border-color: #6875fd;
+    -fx-border-width: 10px;
+    -fx-padding: 10;
+    -fx-spacing: 8;
+    -fx-background-color: #2e8b57;
+
+}
+
+.white_text{
+    -fx-font: 16px "Serif";
+    -fx-text-fill: #fefefe;
+}
+
+
+
+.IOinnershow {
+/*    -fx-background-image: url("graphics/arrow_t_up_right.png");
+    -fx-background-size: 96, 205;
+    -fx-background-repeat: no-repeat;*/
+    -fx-border-color: #2e8b57;
+    -fx-border-width: 2px;
+    -fx-padding: 10;
+    -fx-spacing: 60;
+    -fx-background-color: #CCCCAA;
+
+}
+
+.IOshow {
+/*    -fx-background-image: url("graphics/arrow_t_up_right.png");
+    -fx-background-size: 96, 205;
+    -fx-background-repeat: no-repeat;*/
+        -fx-border-color: #2e8b57;
+    -fx-border-width: 2px;
+    -fx-padding: 10;
+    -fx-spacing: 20;
+    -fx-background-color: #CCCCCC;
 
 }
 
