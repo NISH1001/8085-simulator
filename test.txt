@@ -1,5 +1,0 @@
-;;
-mov b,a
-L1 : MVI A,12
-jmp L1
-EF  
