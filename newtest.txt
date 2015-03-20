@@ -1,3 +1,6 @@
 LXI B,88 88
 RAL
+ADD B
+MOV C,B
+XRA C
 NOP
