@@ -1,12 +1,12 @@
 public class MemoryModule implements Device {
 
-    private short start_addr,addr_size;
-    private short data[];
+    private int start_addr,addr_size;
+    private int data[];
 
     public MemoryModule(int start, int size) {
-        start_addr = (short)start;
-        addr_size = (short)size;
-        data = new short[size];
+        start_addr = (int)start;
+        addr_size = (int)size;
+        data = new int[size];
     }
 
     public boolean hasAddress(int address) {
@@ -21,10 +21,18 @@ public class MemoryModule implements Device {
     }
 
     public void writeByte(int address, int databyte) {
-        data[address-start_addr] = (short)databyte;
+        data[address-start_addr] = (int)databyte;
     }
 
-    public short readByte(int address) {
+    public int readByte(int address) {
         return data[address-start_addr];
-   }
+    }
+
+    public void hexDump(int start, int size) {
+        for (int i=0; i<size; i++) {
+            if (hasAddress(start+i)) {
+                System.out.println(readByte(start+i));
+            }
+        }
+    }
 }

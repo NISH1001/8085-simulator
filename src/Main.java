@@ -8,12 +8,17 @@ public class Main
         int start_addr = (int)0x8000;
 
         //if parser is successful get memory
-        if(p.Initialize("test.txt", start_addr))
+        if(p.Initialize("newtest.txt", start_addr))
         {
             p.ShowData();
-            p.WriteToMemory(memory, 0x8000);
+            p.WriteToMemory(memory, start_addr);
         }
-
+        Processor proc = new Processor();
+        proc.addDevice(memory);
+        proc.setRegI("PC",0x8000);
+        proc.setRegI("B",0x80);
+        proc.run();
         //System.out.println(memory.readByte(0x8001));
+        proc.showRegs();
    }
 }

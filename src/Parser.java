@@ -379,7 +379,7 @@ public class Parser
        int i = 0;
        for(Integer d : data)
        {
-           //mem.writeByte(start_addr+i, d);
+           mem.writeByte(start_addr+i, d);
            i++;
        }
     }

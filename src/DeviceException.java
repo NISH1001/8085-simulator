@@ -1,9 +1,12 @@
 public class DeviceException extends Exception {
-    /*public DeviceException() {
+
+    private static final long serialVersionUID = 2736107;
+
+    public DeviceException() {
         super();
     }
 
     public DeviceException(String message) {
         super(message);
-    }*/
+    }
 }

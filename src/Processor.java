@@ -28,27 +28,42 @@ public class Processor {
         devices.add(d);
     }
 
-    protected short memRead(int address) {
-        for (Device d : devices)
-            if (!d.IO_Mbar() && d.hasAddress(address))
-                return d.readByte(address);
-        return (short)0x00;
+    public Register getReg(String name) {
+        return registers.get(name);
     }
 
-    protected short ioRead(int address) {
+    public int getRegI(String name) {
+        return registers.get(name).getAsInt();
+    }
+
+    public void setRegI(String name, int value) {
+        registers.get(name).setFromInt(value);
+    }
+
+    protected int memRead(int address) {
+        for (Device d : devices) {
+            if (!d.IO_Mbar() && d.hasAddress(address))
+                return d.readByte(address);
+            if (!d.hasAddress(address))
+                System.out.println("fuckup");
+        }
+        return (int)0x00;
+    }
+
+    protected int ioRead(int address) {
         for (Device d : devices)
             if (d.IO_Mbar() && d.hasAddress(address))
                 return d.readByte(address);
-        return (short)0x00;
+        return (int)0x00;
     }
 
-    protected void memWrite(int address, short b) {
+    protected void memWrite(int address, int b) {
         for (Device d : devices)
             if (!d.IO_Mbar() && d.hasAddress(address))
                 d.writeByte(address,(int)b);
     }
 
-    protected void ioWrite(int address, short b) {
+    protected void ioWrite(int address, int b) {
         for (Device d : devices)
             if (d.IO_Mbar() && d.hasAddress(address))
                 d.writeByte(address,(int)b);
@@ -80,6 +95,10 @@ public class Processor {
             return new Register(1);
     }
 
+    protected int getRegFromCodeI(int code) {
+        return getRegFromCode(code).getAsInt();
+    }
+
     protected void regMov(int dest, int src) {
         getRegFromCode(dest).setFromReg(getRegFromCode(src));
     }
@@ -90,13 +109,71 @@ public class Processor {
 
             boolean[] irBits = registers.get("IR").getAsBool();
             Register ir = registers.get("IR");
+            if (ir.getAsInt()==0)
+                break;
 
             // If starts with 01, it is a MOV instruction
             if (!irBits[7] && irBits[6]) {
                 int dst = ir.getBitrangeAsInt(3,5);
                 int src = ir.getBitrangeAsInt(0,2);
                 regMov(dst,src);
+            // If starts with 10, it is an arith. or logical
+            } else if (irBits[7] && !irBits[6]) {
+                // If 1000, then ADD or ADC
+                if (!irBits[5] && !irBits[4]) {
+                    int reg = ir.getBitrangeAsInt(0,2);
+                    if (irBits[3])
+                        setRegI("A",alu.addWithCarry(
+                            getRegI("A"),getRegFromCodeI(reg)));
+                    else
+                        setRegI("A",alu.add(getRegI("A"),
+                                    getRegFromCodeI(reg)));
+                }
+                // If 1001, then SUB or SBB
+                else if (!irBits[5] && irBits[4]) {
+                    int reg = ir.getBitrangeAsInt(0,2);
+                    if (irBits[3])
+                        setRegI("A",alu.subtractWithBorrow(
+                            getRegI("A"),getRegFromCodeI(reg)));
+                    else
+                        setRegI("A",alu.subtract(getRegI("A"),
+                                    getRegFromCodeI(reg)));
+                }
+                // If 1010 0XXX then ANA
+                else if(irBits[5] && !irBits[4] && !irBits[3]) {
+                    int reg = ir.getBitrangeAsInt(0,2);
+                    setRegI("A",alu.and(getRegI("A"),
+                                getRegFromCodeI(reg)));
+                }
+                // If 1010 1XXX then XRA
+                else if(irBits[5] && !irBits[4] && irBits[3]) {
+                    int reg = ir.getBitrangeAsInt(0,2);
+                    setRegI("A",alu.xor(getRegI("A"),
+                                getRegFromCodeI(reg)));
+                }
+                // If 1011 0XXX then ORA
+                else if(irBits[5] && irBits[4] && !irBits[3]) {
+                    int reg = ir.getBitrangeAsInt(0,2);
+                    setRegI("A",alu.or(getRegI("A"),
+                                getRegFromCodeI(reg)));
+                }
+                // If 1011 1XXX then CMP
+                else if(irBits[5] && irBits[4] && irBits[3]) {
+                    int reg = ir.getBitrangeAsInt(0,2);
+                    setRegI("A",alu.cmp(getRegI("A"),
+                                getRegFromCodeI(reg)));
+                }
             }
+            // Increment PC
+            setRegI("PC",getRegI("PC")+1);
+        }
+    }
+
+    public void showRegs() {
+        for (String key : registers.keySet()) {
+            String val =
+                registers.get(key).getAsInt().toString();
+            System.out.println(key+" : "+val);
         }
     }
 }
