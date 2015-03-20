@@ -23,6 +23,7 @@ public class Processor {
         registers.put("PC",new Register(2));
         registers.put("MAR",new Register(2));
         registers.put("SP",new Register(2));
+        setRegI("SP",0xFFFF);
     }
 
     public void addDevice(Device d) {
@@ -126,6 +127,8 @@ public class Processor {
         boolean[] irBits = registers.get("IR").getAsBool();
         Register ir = registers.get("IR");
         Register pc = registers.get("PC");
+        boolean incpc = true;
+
         if (ir.getAsInt()==0)
             break;
 
@@ -401,9 +404,145 @@ public class Processor {
                 alu.cmp(getRegI("A"),getRegFromCodeI(reg));
             }
 
+            // C9 is RET
+            else if (ir.getAsInt()==0xC9) {
+                int retaddr = pop();
+                pc.setFromInt(retaddr);
+                incpc = false;
+            }
+
+            // 11XX X000 is RX (conditional return)
+            else if (ir.getAsInt()%0x8==0) {
+                int cond = ir.getBitrangeAsInt(3,5);
+                if (alu.flags.check(cond)) {
+                    int retaddr = pop();
+                    pc.setFromInt(retaddr);
+                    incpc = false;
+                }
+            }
+
+            // C3 is JMP
+            else if (ir.getAsInt()==0xC3) {
+                    int retaddr = twoBytesFromMem();
+                    pc.setFromInt(retaddr);
+                    incpc = false;
+            }
+
+            // 11XX X010 is JX (conditional jump)
+            else if (ir.getAsInt()%0x8==2) {
+                int cond = ir.getBitrangeAsInt(3,5);
+                if (alu.flags.check(cond)) {
+                    int retaddr = twoBytesFromMem();
+                    pc.setFromInt(retaddr);
+                    incpc = false;
+                }
+            }
+
+            // CD is call
+            else if (ir.getAsInt()==0xCD) {
+                int addr = twoBytesFromMem();
+                push(addr); pc.setFromInt(addr);
+                incpc = false;
+            }
+
+            // 11XX X100 is CX (conditional call)
+            else if (ir.getAsInt()%0x8==4) {
+                int cond = ir.getBitrangeAsInt(3,5);
+                if (alu.flags.check(cond)) {
+                    int addr = twoBytesFromMem(); push(addr);
+                    pc.setFromInt(addr); incpc = false;
+                }
+            }
+
+            // D3 is OUT
+            else if (ir.getAsInt()==0xD3) {
+                int addr = oneByteFromMem();
+                ioWrite(addr,getRegI("A"));
+            }
+
+            // DB is IN
+            else if (ir.getAsInt()==0xDB) {
+                int addr = oneByteFromMem();
+                setRegI("A",ioRead(addr));
+            }
+
+            // E3 is XTHL
+            else if (ir.getAsInt()==0xEB) {
+                int bh,bl;
+                bl = memRead(getRegI("SP"));
+                bh = memRead(getRegI("SP")+1);
+                memWrite(getRegI("SP"),getRegI("L"));
+                memWrite(getRegI("SP")+1,getRegI("H"));
+                setRegI("L",bl); setRegI("H",bh);
+            }
+
+            // F3 is DI
+            else if (ir.getAsInt()==0xEB) { }
+
+            // 11XX 0001 is POP Rp
+            else if (ir.getAsInt()%0x10==1) {
+                int rp = ir.getBitrangeAsInt(4,5);
+                int val = pop();
+                if (rp==0) {
+                    setRegI("B",val/0x100);
+                    setRegI("C",val%0x100);
+                } else if (rp==1) {
+                    setRegI("D",val/0x100);
+                    setRegI("E",val%0x100);
+                } else if (rp==2) {
+                    setRegI("H",val/0x100);
+                    setRegI("L",val%0x100);
+                } else if (rp==3) {
+                    setRegI("A",val/0x100);
+                    alu.flags.setFromInt(val%0x100);
+                }
+            }
+
+            // 11XX 0101 is PUSH Rp
+            else if (ir.getAsInt()%0x10==5) {
+                int rp = ir.getBitrangeAsInt(4,5); int val = 0;
+                if (rp==0) {
+                    val = getRegI("B")*0x100+getRegI("C");
+                } else if (rp==1) {
+                    val = getRegI("D")*0x100+getRegI("E");
+                } else if (rp==2) {
+                    val = getRegI("H")*0x100+getRegI("L");
+                } else if (rp==3) {
+                    val = getRegI("A")*0x100+
+                        alu.flags.getAsInt();
+                }
+                push(val);
+            }
+
+            // 11XX X110 are immediate arithmetic/logic.
+            // ADI,SUI,ANI,ORI,ACI,SBI,XRI,CPI
+            else if (ir.getAsInt()%0x8==6) {
+                int val = oneByteFromMem();
+                int code = ir.getBitrangeAsInt(3,5);
+                if (code==0)  // ADI
+                    setRegI("A",alu.add(getRegI("A"),val));
+                else if (code==1)  // ACI
+                    setRegI("A",
+                            alu.addWithCarry(getRegI("A"),val));
+                else if (code==2)  // SUI
+                    setRegI("A",alu.subtract(getRegI("A"),val));
+                else if (code==3)  // SBI
+                    setRegI("A",alu.subtractWithBorrow(
+                                getRegI("A"),val));
+                else if (code==4)  // ANI
+                    setRegI("A",alu.and(getRegI("A"),val));
+                else if (code==5)  // XRI
+                    setRegI("A",alu.xor(getRegI("A"),val));
+                else if (code==6)  // ORI
+                    setRegI("A",alu.or(getRegI("A"),val));
+                else if (code==7)  // CPI
+                    alu.cmp(getRegI("A"),val);
+            }
         }
+
         // Increment PC
-        setRegI("PC",getRegI("PC")+1);
+        if (incpc)
+            pc.setFromInt(pc.getAsInt()+1);
     } // end while
     }
 
@@ -413,5 +552,31 @@ public class Processor {
                 registers.get(key).getAsInt().toString();
             System.out.println(key+" : "+val);
         }
+    }
+
+    protected void push(int value) {
+        int bl,bh,sp;
+        bl = value%0x100; bh = value/0x100;
+        sp = getRegI("SP");
+        if (sp==0) sp = 0xFFFF;
+        else sp--;
+        memWrite(sp,bh);
+        if (sp==0) sp = 0xFFFF;
+        else sp--;
+        memWrite(sp,bl);
+        setRegI("SP",sp);
+    }
+
+    protected int pop() {
+        int bl,bh,sp;
+        sp = getRegI("SP");
+        bl = memRead(sp);
+        if (sp==0xFFFF) sp = 0;
+        else sp++;
+        bh = memRead(sp);
+        if (sp==0xFFFF) sp = 0;
+        else sp++;
+        setRegI("SP",sp);
+        return bh*0x100+bl;
     }
 }

@@ -49,4 +49,24 @@ public class Flags extends Register {
         setBit(1,parity);
         return res;
     }
+
+    boolean check(int condcode) {
+        if (condcode==0)
+            return !getFlag("zero");
+        else if (condcode==1)
+            return getFlag("zero");
+        else if (condcode==2)
+            return !getFlag("carry");
+        else if (condcode==3)
+            return getFlag("carry");
+        else if (condcode==4)
+            return !getFlag("parity");
+        else if (condcode==5)
+            return getFlag("parity");
+        else if (condcode==6)
+            return !getFlag("sign");
+        else if (condcode==7)
+            return getFlag("sign");
+        return false;
+    }
 }
