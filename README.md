@@ -30,7 +30,7 @@ To compile and run the program run the following :
 
     ant clean
     
-#### sinle command
+#### clean compile run (in a single command)
     ant
     
 
