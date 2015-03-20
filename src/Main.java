@@ -10,6 +10,8 @@ public class Main
         //if parser is successful get memory
         if(p.Initialize("newtest.txt", start_addr))
         {
+            p.ShowOriginalLines();
+            System.out.println("--------------------------");
             p.ShowData();
             p.WriteToMemory(memory, start_addr);
         }
