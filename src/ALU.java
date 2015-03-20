@@ -2,7 +2,7 @@ import java.util.HashMap;
 
 public class ALU {
 
-    Flags flags;
+    public Flags flags;
 
     public ALU() {
         flags = new Flags();
@@ -51,5 +51,43 @@ public class ALU {
 
     public int or(int first, int second) {
         return flags.adjust(0xFF & (first | second));
+    }
+
+    public int rlc(int num) {
+        int firstbit = 0x80 & num;
+        num = 0xFF & (num*2);
+        if (firstbit!=0)
+            num++;
+        return flags.adjust(num);
+    }
+
+    public int rrc(int num) {
+        int lastbit = 0x01 & num;
+        num = 0xFF & (num/2);
+        if (lastbit!=0)
+            num = num | 0x80;
+        return flags.adjust(num);
+    }
+
+    public int ral(int num) {
+        int firstbit = 0x80 & num;
+        boolean carry = flags.getFlag("carry");
+        num = 0xFF & (num*2);
+        if (carry)
+            num = num++;
+        flags.adjust(num);
+        flags.setFlag("carry",(firstbit==0)?false:true);
+        return num;
+    }
+
+    public int rar(int num) {
+        int lastbit = 0x01 & num;
+        boolean carry = flags.getFlag("carry");
+        num = 0xFF & (num/2);
+        if (carry)
+            num = num|0x80;
+        flags.adjust(num);
+        flags.setFlag("carry",(lastbit==0)?false:true);
+        return num;
     }
 }

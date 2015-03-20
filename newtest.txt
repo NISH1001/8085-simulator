@@ -1,2 +1,3 @@
-ADD B
+MVI A,8
+RAL
 NOP

@@ -44,8 +44,6 @@ public class Processor {
         for (Device d : devices) {
             if (!d.IO_Mbar() && d.hasAddress(address))
                 return d.readByte(address);
-            if (!d.hasAddress(address))
-                System.out.println("fuckup");
         }
         return (int)0x00;
     }
@@ -99,6 +97,10 @@ public class Processor {
         return getRegFromCode(code).getAsInt();
     }
 
+    protected void setRegFromCodeI(int code, int value) {
+        getRegFromCode(code).setFromInt(value);
+    }
+
     protected void regMov(int dest, int src) {
         getRegFromCode(dest).setFromReg(getRegFromCode(src));
     }
@@ -112,8 +114,55 @@ public class Processor {
             if (ir.getAsInt()==0)
                 break;
 
+            // If starts with 00, group 1 instruction
+            if (!irBits[7] && !irBits[6]) {
+                // 07 is RLC
+                if (ir.getAsInt()==7)
+                    setRegI("A",alu.rlc(getRegI("A")));
+                // 0F is RRC
+                else if (ir.getAsInt()==0x0F)
+                    setRegI("A",alu.rrc(getRegI("A")));
+                // 17 is RAL
+                else if (ir.getAsInt()==0x17)
+                    setRegI("A",alu.ral(getRegI("A")));
+                // 1F is RAR
+                else if (ir.getAsInt()==0x1F)
+                    setRegI("A",alu.rar(getRegI("A")));
+                // 27 is DAA
+                else if (ir.getAsInt()==0x27)
+                    ;
+                // 2F is CMA
+                else if (ir.getAsInt()==0x2F)
+                    setRegI("A",alu.xor(0xFF,getRegI("A")));
+                // 37 is STC
+                else if (ir.getAsInt()==0x37)
+                    alu.flags.setFlag("carry",true);
+                // 3F is CTC
+                else if (ir.getAsInt()==0x3F)
+                    alu.flags.setFlag("carry",
+                            !alu.flags.getFlag("carry"));
+                // 00XX X100 is INR
+                else if (ir.getBitrangeAsInt(0,2)==4) {
+                    int reg = ir.getBitrangeAsInt(3,5);
+                    setRegFromCodeI(reg,
+                            alu.add(getRegFromCodeI(reg),1));
+                }
+                // 00XX X101 is DCR
+                else if (ir.getBitrangeAsInt(0,2)==5) {
+                    int reg = ir.getBitrangeAsInt(3,5);
+                    setRegFromCodeI(reg,alu.subtract(
+                                getRegFromCodeI(reg),1));
+                }
+                // 00XX X110 is MVI
+                else if (ir.getBitrangeAsInt(0,2)==6) {
+                    int reg = ir.getBitrangeAsInt(3,5);
+                    setRegI("PC",getRegI("PC")+1);
+                    int val = memRead(getRegI("PC"));
+                    setRegFromCodeI(reg,val);
+                }
+            }
             // If starts with 01, it is a MOV instruction
-            if (!irBits[7] && irBits[6]) {
+            else if (!irBits[7] && irBits[6]) {
                 int dst = ir.getBitrangeAsInt(3,5);
                 int src = ir.getBitrangeAsInt(0,2);
                 regMov(dst,src);
@@ -160,8 +209,7 @@ public class Processor {
                 // If 1011 1XXX then CMP
                 else if(irBits[5] && irBits[4] && irBits[3]) {
                     int reg = ir.getBitrangeAsInt(0,2);
-                    setRegI("A",alu.cmp(getRegI("A"),
-                                getRegFromCodeI(reg)));
+                    alu.cmp(getRegI("A"),getRegFromCodeI(reg));
                 }
             }
             // Increment PC
