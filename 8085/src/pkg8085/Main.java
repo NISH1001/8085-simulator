@@ -6,6 +6,10 @@
 package pkg8085;
 
  
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
@@ -187,7 +191,28 @@ public class Main extends Application {
                 hexeditor_run_step_next.setVisible(false);
                 hexeditor_run_step_prev.setVisible(false);
                 
-                editor_run.setOnAction(e-> {});
+                editor_run.setOnAction(e-> {
+                            try {
+                                PrintWriter just_write = new PrintWriter("temp.txt");
+                                just_write.println(editor.getText());
+                                just_write.close();
+                            } catch (FileNotFoundException ex) {
+                                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        Parser p = new Parser();
+
+                        int start_addr = 8000;
+
+                        //if parser is successful get memory
+                        if(p.Initialize("temp.txt", start_addr))
+                        {
+                            p.WriteToMemory(memory, start_addr);
+                                //initial table from 8000
+                               memory_table_update(start_addr);
+                        }
+
+            
+                });
                 hexeditor_run.setOnAction(e-> {});
                 editor_run_step.setOnAction(e->{
                     editor_run_step_next.setVisible(true);
