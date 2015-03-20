@@ -15,7 +15,7 @@ After installing the JDK install ant for compiling the project :
 ##Compiling and Running
 Check out the latest sources with:
 
-    git clone https://github.com/tnagorra/BOBS-Simulator
+    git clone https://github.com/NISH1001/8085-simulator.git
 
 To compile and run the program run the following :
 #### compile the source
