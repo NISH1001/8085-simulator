@@ -6,6 +6,7 @@ public class Processor {
     private ALU alu;
     private HashMap<String,Register> registers;
     private ArrayList<Device> devices;
+    private boolean enable_intr;
 
     public Processor() {
         alu = new ALU();
@@ -24,6 +25,7 @@ public class Processor {
         registers.put("MAR",new Register(2));
         registers.put("SP",new Register(2));
         setRegI("SP",0xFFFF);
+        enable_intr = false;
     }
 
     public void addDevice(Device d) {
@@ -87,9 +89,12 @@ public class Processor {
             return registers.get("H");
         else if (code==5)
             return registers.get("L");
-        else if (code==6)
-            return registers.get("M");
-        else if (code==7)
+        else if (code==6) {
+            Register memreg = new Register(1);
+            memreg.setFromInt(memRead(
+                        getRegI("H")*0x100+getRegI("L")));
+            return memreg;
+        } else if (code==7)
             return registers.get("A");
         else
             return new Register(1);
@@ -100,36 +105,42 @@ public class Processor {
     }
 
     protected void setRegFromCodeI(int code, int value) {
-        getRegFromCode(code).setFromInt(value);
+        // Special treatment for the M 'register'
+        if (code==6)
+            memWrite(getRegI("H")*0x100+getRegI("L"),value);
+        else
+            getRegFromCode(code).setFromInt(value);
     }
 
     protected void regMov(int dest, int src) {
-        getRegFromCode(dest).setFromReg(getRegFromCode(src));
+        setRegFromCodeI(dest,getRegFromCodeI(src));
     }
 
     protected int twoBytesFromMem() {
-        setRegI("PC",getRegI("PC")+1);
         int val = memRead(getRegI("PC"));
         setRegI("PC",getRegI("PC")+1);
         val += 0x100*memRead(getRegI("PC"));
+        setRegI("PC",getRegI("PC")+1);
         return val;
     }
 
     protected int oneByteFromMem() {
+        int res = memRead(getRegI("PC"));
         setRegI("PC",getRegI("PC")+1);
-        return memRead(getRegI("PC"));
+        return res;
     }
 
     public void run() {
+        Register pc = registers.get("PC");
     while (true) {
         fetch();
+        pc.setFromInt(pc.getAsInt()+1);
 
         boolean[] irBits = registers.get("IR").getAsBool();
         Register ir = registers.get("IR");
-        Register pc = registers.get("PC");
-        boolean incpc = true;
 
-        if (ir.getAsInt()==0)
+        // Break on HLT
+        if (ir.getAsInt() == 0x76)
             break;
 
         // If starts with 00, group 1 instruction
@@ -152,18 +163,24 @@ public class Processor {
                 setRegI("A",alu.rar(getRegI("A")));
 
             // 27 is DAA
-            else if (ir.getAsInt()==0x27)
-                ;
+            else if (ir.getAsInt()==0x27) {
+                if (getRegI("A")%0x10>9 ||
+                        alu.flags.getFlag("auxcarry"))
+                    setRegI("A",alu.add(getRegI("A"),6));
+                if (getRegI("A")/0x10>9 ||
+                        alu.flags.getFlag("carry"))
+                    setRegI("A",alu.add(getRegI("A"),0x60));
+            }
 
             // 2F is CMA
             else if (ir.getAsInt()==0x2F)
-                setRegI("A",alu.xor(0xFF,getRegI("A")));
+                setRegI("A",alu.complement(getRegI("A")));
 
             // 37 is STC
             else if (ir.getAsInt()==0x37)
                 alu.flags.setFlag("carry",true);
 
-            // 3F is CTC
+            // 3F is CMC
             else if (ir.getAsInt()==0x3F)
                 alu.flags.setFlag("carry",
                         !alu.flags.getFlag("carry"));
@@ -171,8 +188,12 @@ public class Processor {
             // 00XX X100 is INR
             else if (ir.getBitrangeAsInt(0,2)==4) {
                 int reg = ir.getBitrangeAsInt(3,5);
+                // INR leaves CY flag unaffected.
+                // hence this workaround.
+                boolean cyflag = alu.flags.getFlag("carry");
                 setRegFromCodeI(reg,
                         alu.add(getRegFromCodeI(reg),1));
+                alu.flags.setFlag("carry",cyflag);
             }
 
             // 00XX X101 is DCR
@@ -214,11 +235,13 @@ public class Processor {
 
             // 39 is DAD SP
             else if (ir.getAsInt()==0x39) {
-                int sum = getRegI("SP");
+                int sum = getRegI("SP"), res;
                 sum += getRegI("H")*0x100 + getRegI("L");
-                sum = sum & 0xFFFF;
-                setRegI("L",sum%0x100);
-                setRegI("H",sum/0x100);
+                res = sum & 0xFFFF;
+                setRegI("L",res%0x100);
+                setRegI("H",res/0x100);
+                if (res<sum)
+                    alu.flags.setFlag("carry",true);
             }
 
             // 22 is SHLD
@@ -382,6 +405,9 @@ public class Processor {
                 int reg = ir.getBitrangeAsInt(0,2);
                 setRegI("A",alu.and(getRegI("A"),
                             getRegFromCodeI(reg)));
+                // CY is reset and AC is set after ANA
+                alu.flags.setFlag("carry",false);
+                alu.flags.setFlag("auxcarry",true);
             }
 
             // If 1010 1XXX then XRA
@@ -389,6 +415,9 @@ public class Processor {
                 int reg = ir.getBitrangeAsInt(0,2);
                 setRegI("A",alu.xor(getRegI("A"),
                             getRegFromCodeI(reg)));
+                // XRA resets flags CY and AC
+                alu.flags.setFlag("carry",false);
+                alu.flags.setFlag("auxcarry",false);
             }
 
             // If 1011 0XXX then ORA
@@ -396,6 +425,9 @@ public class Processor {
                 int reg = ir.getBitrangeAsInt(0,2);
                 setRegI("A",alu.or(getRegI("A"),
                             getRegFromCodeI(reg)));
+                // ORA resets AC and CY
+                alu.flags.setFlag("auxcarry",false);
+                alu.flags.setFlag("carry",false);
             }
 
             // If 1011 1XXX then CMP
@@ -408,7 +440,6 @@ public class Processor {
             else if (ir.getAsInt()==0xC9) {
                 int retaddr = pop();
                 pc.setFromInt(retaddr);
-                incpc = false;
             }
 
             // 11XX X000 is RX (conditional return)
@@ -417,7 +448,6 @@ public class Processor {
                 if (alu.flags.check(cond)) {
                     int retaddr = pop();
                     pc.setFromInt(retaddr);
-                    incpc = false;
                 }
             }
 
@@ -425,7 +455,6 @@ public class Processor {
             else if (ir.getAsInt()==0xC3) {
                     int retaddr = twoBytesFromMem();
                     pc.setFromInt(retaddr);
-                    incpc = false;
             }
 
             // 11XX X010 is JX (conditional jump)
@@ -434,15 +463,13 @@ public class Processor {
                 if (alu.flags.check(cond)) {
                     int retaddr = twoBytesFromMem();
                     pc.setFromInt(retaddr);
-                    incpc = false;
                 }
             }
 
-            // CD is call
+            // CD is CALL
             else if (ir.getAsInt()==0xCD) {
                 int addr = twoBytesFromMem();
                 push(addr); pc.setFromInt(addr);
-                incpc = false;
             }
 
             // 11XX X100 is CX (conditional call)
@@ -450,7 +477,7 @@ public class Processor {
                 int cond = ir.getBitrangeAsInt(3,5);
                 if (alu.flags.check(cond)) {
                     int addr = twoBytesFromMem(); push(addr);
-                    pc.setFromInt(addr); incpc = false;
+                    pc.setFromInt(addr);
                 }
             }
 
@@ -477,7 +504,9 @@ public class Processor {
             }
 
             // F3 is DI
-            else if (ir.getAsInt()==0xEB) { }
+            else if (ir.getAsInt()==0xEB) {
+                enable_intr = false;
+            }
 
             // 11XX 0001 is POP Rp
             else if (ir.getAsInt()%0x10==1) {
@@ -529,13 +558,19 @@ public class Processor {
                 else if (code==3)  // SBI
                     setRegI("A",alu.subtractWithBorrow(
                                 getRegI("A"),val));
-                else if (code==4)  // ANI
+                else if (code==4) { // ANI
                     setRegI("A",alu.and(getRegI("A"),val));
-                else if (code==5)  // XRI
+                    alu.flags.setFlag("carry",false);
+                    alu.flags.setFlag("auxcarry",true);
+                } else if (code==5) { // XRI
                     setRegI("A",alu.xor(getRegI("A"),val));
-                else if (code==6)  // ORI
+                    alu.flags.setFlag("carry",false);
+                    alu.flags.setFlag("auxcarry",false);
+                } else if (code==6) { // ORI
                     setRegI("A",alu.or(getRegI("A"),val));
-                else if (code==7)  // CPI
+                    alu.flags.setFlag("carry",false);
+                    alu.flags.setFlag("auxcarry",false);
+                } else if (code==7)  // CPI
                     alu.cmp(getRegI("A"),val);
             }
 
@@ -543,13 +578,11 @@ public class Processor {
             else if (ir.getAsInt()%0x8==7) {
                 int code = ir.getBitrangeAsInt(3,5);
                 pc.setFromInt(code*0x8);
-                incpc = false;
             }
 
             // E9 is PCHL
             else if (ir.getAsInt()==0xE9) {
                 pc.setFromInt(getRegI("H")*0x100+getRegI("L"));
-                incpc = false;
             }
 
             // F9 is SPHL
@@ -567,19 +600,18 @@ public class Processor {
             }
 
             // FB is EI
-            else if (ir.getAsInt()==0xFB) { }
+            else if (ir.getAsInt()==0xFB) {
+                enable_intr = true;
+            }
         }
 
-        // Increment PC
-        if (incpc)
-            pc.setFromInt(pc.getAsInt()+1);
     } // end while
     }
 
     public void showRegs() {
         for (String key : registers.keySet()) {
-            String val =
-                registers.get(key).getAsInt().toString();
+            String val = Integer.toHexString(
+                    registers.get(key).getAsInt());
             System.out.println(key+" : "+val);
         }
     }

@@ -13,15 +13,15 @@ public class ALU {
     }
 
     public int addWithCarry(int first, int second) {
-        int r = (int)add(first, second);
+        int r = add(first, second);
         if (flags.getFlag("carry"))
             r++;
         return flags.adjust(r);
     }
 
     public int twoscomplement(int b) {
-        int bt = b;
-        bt = (0xFF-bt)+1;
+        int bt = 0xFF & b;
+        bt = 0xFF & ((0xFF-bt)+1);
         return flags.adjust(bt);
     }
 
@@ -37,8 +37,8 @@ public class ALU {
         return r;
     }
 
-    public int cmp(int first, int second) {
-        return flags.adjust(first-second);
+    public void cmp(int first, int second) {
+        subtract(first,second);
     }
 
     public int and(int first, int second) {
@@ -53,9 +53,14 @@ public class ALU {
         return flags.adjust(0xFF & (first | second));
     }
 
+    // This one doesn't modify flags, needed for CMA
+    public int complement(int b) {
+        return (b&0xFF)^0xFF;
+    }
+
     public int rlc(int num) {
         int firstbit = 0x80 & num;
-        num = 0xFF & (num*2);
+        num = num*2;
         if (firstbit!=0)
             num++;
         return flags.adjust(num);
@@ -63,10 +68,12 @@ public class ALU {
 
     public int rrc(int num) {
         int lastbit = 0x01 & num;
-        num = 0xFF & (num/2);
+        num = num/2;
         if (lastbit!=0)
             num = num | 0x80;
-        return flags.adjust(num);
+        num = flags.adjust(num);
+        flags.setFlag("carry",(lastbit!=0));
+        return num;
     }
 
     public int ral(int num) {

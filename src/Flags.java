@@ -32,8 +32,8 @@ public class Flags extends Register {
             setBit(7,value);
     }
 
-    public short adjust(int result) {
-        short res = (short)(0xFF & result);
+    public int adjust(int result) {
+        int res = 0xFF & result;
         if (result==0)
             setBit(6,true);
         else if (result>0x7f)

@@ -31,7 +31,8 @@ public class MemoryModule implements Device {
     public void hexDump(int start, int size) {
         for (int i=0; i<size; i++) {
             if (hasAddress(start+i)) {
-                System.out.println(readByte(start+i));
+                Integer d = readByte(start+i);
+                System.out.println(Integer.toHexString(d));
             }
         }
     }
