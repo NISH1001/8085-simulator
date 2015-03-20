@@ -119,7 +119,7 @@ public class Processor {
                 regMov(dst,src);
             // If starts with 10, it is an arith. or logical
             } else if (irBits[7] && !irBits[6]) {
-                // If 1000, then ADD or ADC
+                // If 10000 xxx, then ADD or ADC , xxx = register binary code
                 if (!irBits[5] && !irBits[4]) {
                     int reg = ir.getBitrangeAsInt(0,2);
                     if (irBits[3])

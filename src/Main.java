@@ -13,12 +13,13 @@ public class Main
             p.ShowOriginalLines();
             System.out.println("--------------------------");
             p.ShowData();
+            System.out.println("--------------------------");
             p.WriteToMemory(memory, start_addr);
         }
         Processor proc = new Processor();
         proc.addDevice(memory);
         proc.setRegI("PC",0x8000);
-        proc.setRegI("B",0x80);
+        proc.setRegI("B",0x08);
         proc.run();
         //System.out.println(memory.readByte(0x8001));
         proc.showRegs();

@@ -1,2 +1,4 @@
 ADD B
+MOV C,B
+XRA C
 NOP

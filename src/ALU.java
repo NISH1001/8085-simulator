@@ -37,8 +37,8 @@ public class ALU {
         return r;
     }
 
-    public void cmp(int first, int second) {
-        flags.adjust(first-second);
+    public int cmp(int first, int second) {
+        return flags.adjust(first-second);
     }
 
     public int and(int first, int second) {

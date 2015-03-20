@@ -23,11 +23,11 @@ public class Flags extends Register {
         if (flag=="carry")
             setBit(0,value);
         else if (flag=="parity")
-            setBit(1,value);
+            setBit(2,value);
         else if (flag=="auxcarry")
-            setBit(3,value);
+            setBit(4,value);
         else if (flag=="zero")
-            setBit(5,value);
+            setBit(6,value);
         else if (flag=="sign")
             setBit(7,value);
     }
@@ -35,7 +35,7 @@ public class Flags extends Register {
     public short adjust(int result) {
         short res = (short)(0xFF & result);
         if (result==0)
-            setBit(5,true);
+            setBit(6,true);
         else if (result>0x7f)
             setBit(7,true);
         if (result>res)
@@ -46,7 +46,7 @@ public class Flags extends Register {
                 parity=!parity;
             result/=2;
         }
-        setBit(1,parity);
+        setBit(2,parity);
         return res;
     }
 }
