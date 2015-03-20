@@ -538,6 +538,36 @@ public class Processor {
                 else if (code==7)  // CPI
                     alu.cmp(getRegI("A"),val);
             }
+
+            // 11XX X111 are RST X
+            else if (ir.getAsInt()%0x8==7) {
+                int code = ir.getBitrangeAsInt(3,5);
+                pc.setFromInt(code*0x8);
+                incpc = false;
+            }
+
+            // E9 is PCHL
+            else if (ir.getAsInt()==0xE9) {
+                pc.setFromInt(getRegI("H")*0x100+getRegI("L"));
+                incpc = false;
+            }
+
+            // F9 is SPHL
+            else if (ir.getAsInt()==0xF9) {
+                registers.get("SP").setFromInt(
+                        getRegI("H")*0x100+getRegI("L"));
+            }
+
+            // EB is XCHG
+            else if (ir.getAsInt()==0xEB) {
+                int e = getRegI("E"); int d = getRegI("D");
+                setRegI("E",getRegI("L"));
+                setRegI("D",getRegI("H"));
+                setRegI("H",d); setRegI("L",e);
+            }
+
+            // FB is EI
+            else if (ir.getAsInt()==0xFB) { }
         }
 
         // Increment PC
