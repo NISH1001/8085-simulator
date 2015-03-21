@@ -330,9 +330,9 @@ public class Parser
                     
                     //if it is a decimal data ie suffexed wit 'd'
                     String[] splitted = converted.split(" ");
-                    if(splitted[1].matches("[0-9]+D"))
+                    if(splitted[1].matches("[0-9]+'D"))
                     {
-                        int value = Integer.parseInt(splitted[1].replaceAll("D",""));
+                        int value = Integer.parseInt(splitted[1].replaceAll("'D",""));
                         String valhex = Integer.toHexString(value);
                         converted = converted.replaceAll(splitted[1],valhex);
                     }
@@ -371,9 +371,9 @@ public class Parser
                             converted = converted.replaceAll(splitted[1], toreplace);
                         }
 
-                        if(splitted[1].matches("[0-9]+D"))
+                        if(splitted[1].matches("[0-9]+'D"))
                         {
-                            int value = Integer.parseInt(splitted[1].replaceAll("D",""));
+                            int value = Integer.parseInt(splitted[1].replaceAll("'D",""));
                             String valhex = Integer.toHexString(value);
                             String toreplace = FillString(4, valhex,'0');
                             toreplace = toreplace.substring(0,2) + " " + toreplace.substring(2,4);
