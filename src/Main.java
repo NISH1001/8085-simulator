@@ -8,7 +8,7 @@ public class Main
         int start_addr = (int)0x8000;
 
         //if parser is successful get memory
-        if(p.Initialize("newtest.txt", start_addr))
+        if(p.InitializeFile("newtest.txt", start_addr))
         {
             p.ShowOriginalLines();
             System.out.println("--------------------------");

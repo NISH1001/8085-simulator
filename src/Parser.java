@@ -31,9 +31,10 @@ public class Parser
         opcode = new Opcode();
     }
 
-    public boolean Initialize(String filename, int start_addr)
+    public boolean InitializeFile(String filename,
+            int start_addr)
     {
-        boolean first = FirstPass(filename, start_addr);
+        boolean first = FirstPass(filename, start_addr,true);
         if(!first)
             return false;
 
@@ -43,15 +44,30 @@ public class Parser
         return true;
     }
 
+    public boolean InitializeString(String data,int start_addr)
+    {
+        if (!FirstPass(data,start_addr,false))
+            return false;
+        if (!SecondPass())
+            return false;
+        return true;
+    }
 
-    public boolean FirstPass(String filename, int start_address)
+    public boolean FirstPass(String filename,
+            int start_address, boolean isFilename)
     {
         int start_addr = (int)start_address;
         int linenumber = 0;
         String line = new String();
         try
         {
-            BufferedReader reader = new BufferedReader( new FileReader(filename));
+            BufferedReader reader;
+            if (isFilename)
+                reader = new BufferedReader(
+                        new FileReader(filename));
+            else
+                reader = new BufferedReader(
+                        new StringReader(filename));
 
             while((line = reader.readLine()) != null)
             {
@@ -99,6 +115,7 @@ public class Parser
                         {
                             throw new ParseException("Label must not contain spaces -> " + copy + " :: linenumber -> " + linenumber);
                         }
+
 
                         if(!l1.matches("[A-Z][0-9A-Z]*"))
                         {
