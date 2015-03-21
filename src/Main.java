@@ -19,8 +19,16 @@ public class Main
         Processor proc = new Processor();
         proc.addDevice(memory);
         proc.setRegI("PC",0x8000);
-        proc.run();
+        Thread proc_thread = new Thread(proc);
+        proc_thread.start();
         //System.out.println(memory.readByte(0x8001));
+        GuiMain gui = new GuiMain();
+        gui.setVisible(true);
+        try {
+            proc_thread.join();
+        } catch (InterruptedException e) {
+            System.out.println("interrupted");
+        }
         proc.showRegs();
    }
 }

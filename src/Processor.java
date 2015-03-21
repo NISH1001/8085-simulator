@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Processor {
+public class Processor implements Runnable {
 
     private ALU alu;
     private HashMap<String,Register> registers;
