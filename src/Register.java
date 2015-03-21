@@ -65,9 +65,8 @@ public class Register {
    }
 
    public void setFromReg(Register another) {
-       for(int i=0;i<data.length && i<another.data.length;i++) {
+       for (int i=0;i<data.length && i<another.data.length;i++)
            data[i] = another.data[i];
-       }
    }
 
    public int getBitrangeAsInt(int start, int end) {

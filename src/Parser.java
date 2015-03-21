@@ -407,4 +407,9 @@ public class Parser
            i++;
        }
     }
+
+    // Return the size
+    public int size() {
+        return data.size();
+    }
 }

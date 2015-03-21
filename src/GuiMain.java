@@ -27,6 +27,7 @@ import javax.swing.JToolBar;
 import javax.swing.JFileChooser;
 import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
@@ -40,9 +41,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class GuiMain extends JFrame {
+public class GuiMain extends JFrame implements Runnable {
     private JTabbedPane tabbedpane;
     private ArrayList<TabItem> tabitems;
+    private Processor proc;
+
+    // Register status labels
+    private JLabel rega,regb,regc,regd,rege,regh,regl,regpc;
 
     public GuiMain() {
         initUI();
@@ -74,25 +79,21 @@ public class GuiMain extends JFrame {
         JLabel title = new JLabel("Processor Status");
         title.setFont(new Font("Serif",Font.PLAIN,14));
         row_title.add(title);
-        JLabel rega = new JLabel("A 00");
+        rega = new JLabel("A 00");
         row_rega.add(rega);
-        JLabel regb = new JLabel("B 00");
-        JLabel regc = new JLabel("C 00");
+        regb = new JLabel("B 00"); regc = new JLabel("C 00");
         row_regbc.add(regb);
         row_regbc.add(Box.createRigidArea(new Dimension(5,0)));
         row_regbc.add(regc);
-        JLabel regd = new JLabel("D 00");
-        JLabel rege = new JLabel("E 00");
+        regd = new JLabel("D 00"); rege = new JLabel("E 00");
         row_regde.add(regd);
         row_regde.add(Box.createRigidArea(new Dimension(5,0)));
         row_regde.add(rege);
-        JLabel regh = new JLabel("H 00");
-        JLabel regl = new JLabel("L 00");
+        regh = new JLabel("H 00"); regl = new JLabel("L 00");
         row_reghl.add(regh);
         row_reghl.add(Box.createRigidArea(new Dimension(5,0)));
         row_reghl.add(regl);
-        JLabel regpc = new JLabel(
-                "PC 0000");
+        regpc = new JLabel("PC 0000");
         row_regpc.add(regpc);
 
         statuspanel.add(row_title);
@@ -127,27 +128,40 @@ public class GuiMain extends JFrame {
         JMenu file = new JMenu("File");
         file.setMnemonic(KeyEvent.VK_F);
 
-        JMenuItem nMenuItem = new JMenuItem("New");
-        nMenuItem.addActionListener(new NewFileAction());
-        JMenuItem oMenuItem = new JMenuItem("Open");
-        oMenuItem.addActionListener(new OpenFileAction());
-        JMenuItem sMenuItem = new JMenuItem("Save");
-        JMenuItem eMenuItem = new JMenuItem("Exit");
-        eMenuItem.setMnemonic(KeyEvent.VK_E);
-        eMenuItem.setToolTipText("Exit application");
-        eMenuItem.addActionListener(new ActionListener() {
+        JMenuItem item_f_new = new JMenuItem("New");
+        item_f_new.addActionListener(new NewFileAction());
+        JMenuItem item_f_open = new JMenuItem("Open");
+        item_f_open.addActionListener(new OpenFileAction());
+        JMenuItem item_f_save = new JMenuItem("Save");
+        JMenuItem item_f_exit = new JMenuItem("Exit");
+        item_f_exit.setMnemonic(KeyEvent.VK_E);
+        item_f_exit.setToolTipText("Exit application");
+        item_f_exit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
                 System.exit(0);
             }
         });
 
-        file.add(nMenuItem);
-        file.add(oMenuItem);
-        file.add(sMenuItem);
+        file.add(item_f_new);
+        file.add(item_f_open);
+        file.add(item_f_save);
         file.addSeparator();
-        file.add(eMenuItem);
+        file.add(item_f_exit);
+
+        JMenu run = new JMenu("Run");
+        run.setMnemonic(KeyEvent.VK_R);
+
+        JMenuItem item_r_exec = new JMenuItem("Execute");
+        item_r_exec.addActionListener(new ExecuteAction());
+        JMenuItem item_r_stop = new JMenuItem("Stop");
+        //item_r_stop.addActionListener();
+
+        run.add(item_r_exec);
+        run.add(item_r_stop);
+
         menubar.add(file);
+        menubar.add(run);
         setJMenuBar(menubar);
     }
 
@@ -231,6 +245,28 @@ public class GuiMain extends JFrame {
         }
     }
 
+    private class ExecuteAction extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JViewport activevp =
+            ((JScrollPane)tabbedpane.getSelectedComponent())
+                .getViewport();
+            JTextArea active = (JTextArea)activevp.getView();
+            String code = active.getText();
+
+            MemoryModule memory =
+                new MemoryModule(0x0000, 0x10000);
+            int start_addr = (int)0x8000;
+            MultipleParser mp = new MultipleParser(memory);
+            mp.initializeString(code,start_addr);
+            proc = new Processor();
+            proc.addDevice(memory);
+            proc.setRegI("PC",0x8000);
+            Thread proc_thread = new Thread(proc);
+            proc_thread.start();
+        }
+    }
+
     private class TabItem {
         public String title;
         public JTextArea codearea;
@@ -251,6 +287,32 @@ public class GuiMain extends JFrame {
 
         public void addTo(JTabbedPane jtp) {
             jtp.addTab(title,scrollpane);
+        }
+    }
+
+    public void run() {
+        try {
+        while (true) {
+            if (proc!=null) {
+                rega.setText("A "+Integer.toHexString(
+                        proc.getRegI("A")));
+                regb.setText("B "+Integer.toHexString(
+                        proc.getRegI("B")));
+                regc.setText("C "+Integer.toHexString(
+                        proc.getRegI("C")));
+                regd.setText("D "+Integer.toHexString(
+                        proc.getRegI("D")));
+                rege.setText("E "+Integer.toHexString(
+                        proc.getRegI("E")));
+                regh.setText("H "+Integer.toHexString(
+                        proc.getRegI("H")));
+                regl.setText("L "+Integer.toHexString(
+                        proc.getRegI("L")));
+                regpc.setText("PC "+Integer.toHexString(
+                        proc.getRegI("PC")));
+            }
+            Thread.sleep(75);
+        } } catch (Exception e) {
         }
     }
 }

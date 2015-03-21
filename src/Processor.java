@@ -36,7 +36,7 @@ public class Processor implements Runnable {
         return registers.get(name);
     }
 
-    public int getRegI(String name) {
+    public Integer getRegI(String name) {
         return registers.get(name).getAsInt();
     }
 
@@ -100,7 +100,7 @@ public class Processor implements Runnable {
             return new Register(1);
     }
 
-    protected int getRegFromCodeI(int code) {
+    protected Integer getRegFromCodeI(int code) {
         return getRegFromCode(code).getAsInt();
     }
 
@@ -226,8 +226,9 @@ public class Processor implements Runnable {
                 memWrite(twoBytesFromMem(),getRegI("A"));
 
             // 3A is LDA
-            else if (ir.getAsInt()==0x3A)
-                setRegI("A",twoBytesFromMem());
+            else if (ir.getAsInt()==0x3A) {
+                setRegI("A",memRead(twoBytesFromMem()));
+            }
 
             // 31 is LXI SP
             else if (ir.getAsInt()==0x31)
