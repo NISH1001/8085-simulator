@@ -1,6 +1,6 @@
 NOP
 MVI A,05
-STA 00 90
-LXI H, 00 90
+STA 90 00       ;now little endian is added so just do it as normal way
+LXI H, 90 00
 MOV B,M
 HLT

@@ -231,7 +231,8 @@ public class Parser
                 }
 
                 //if everthing is success store into RAM
-                for(int i=0; i<len; ++i)
+                data.add(codes[0]);
+                for(int i=codes.length-1; i>0; --i)
                 {
                     data.add(codes[i]);
                 }
