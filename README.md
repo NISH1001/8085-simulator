@@ -17,7 +17,7 @@ Check out the latest sources with:
 
     git clone https://github.com/NISH1001/8085-simulator.git
 
-To compile and run the program run the following :
+To compile and run, run the following command :
 #### compile the source
 
     ant compile

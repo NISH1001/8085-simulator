@@ -1,6 +1,7 @@
 NOP
-MVI A,05
-STA 90 00       ;now little endian is added so just do it as normal way
-LXI H, 90 00
-MOV B,M
+MVI A, 99d
+STA 9000      ;now little endian is added so just do it as normal way -> 900 is converted to 0900
+LXI H, 90 00 ; space is still allowed for convinience
+L1 : MOV B,M
+jmp L1
 HLT

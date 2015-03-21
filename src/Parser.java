@@ -272,12 +272,8 @@ public class Parser
                 String hexcode = Integer.toHexString(label_addr);
                 int len = hexcode.length();
 
-                //to fill with zeroes -> filling is faster than loop
-                char[] z = new char[4-len];
-                Arrays.fill(z, '0');
-                String temp = new String(z);
-
-                hexcode = temp + hexcode;
+                //to fill with  zeroes
+                hexcode = FillString(4, hexcode, '0');
                 hexcode = hexcode.substring(0,2) + " " + hexcode.substring(2,4);
                 converted = line.replaceAll(label, hexcode);
             }
@@ -324,13 +320,22 @@ public class Parser
                 String hexcode = Integer.toHexString(opcode.getKey());
                 String engcode = opcode.getValue();
 
-                //replae *,* with just a space
-                line = line.replaceAll("\\s*,\\s*", " ");
                 matched = line.toUpperCase().contains(engcode.toUpperCase());
 
                 if(matched)
                 {
+                    //replae first occurence of *,* with just a space
+                    line = line.replaceFirst("\\s*,\\s*", " ");
                     converted = line.replaceAll(engcode, hexcode);
+                    
+                    //if it is a decimal data ie suffexed wit 'd'
+                    String[] splitted = converted.split(" ");
+                    if(splitted[1].matches("[0-9]+D"))
+                    {
+                        int value = Integer.parseInt(splitted[1].replaceAll("D",""));
+                        String valhex = Integer.toHexString(value);
+                        converted = converted.replaceAll(splitted[1],valhex);
+                    }
                     break;
                 }
             }
@@ -348,13 +353,34 @@ public class Parser
                 String hexcode = Integer.toHexString(opcode.getKey());
                 String engcode = opcode.getValue();
 
-                //replae *,* with just a space
-                line = line.replaceAll("\\s*,\\s*", " ");
                 matched = line.toUpperCase().contains(engcode.toUpperCase());
 
                 if(matched)
                 {
+                    //replae first occurence of *,* with just a space
+                    line = line.replaceFirst("\\s*,\\s*", " ");
                     converted = line.replaceAll(engcode, hexcode);
+
+                    String[] splitted = converted.split(" ");
+                    if(splitted.length == 2)
+                    {
+                        if(splitted[1].matches("[0-9]{1,4}"))
+                        {
+                            String toreplace = FillString(4,splitted[1],'0');
+                            toreplace = toreplace.substring(0,2) + " " + toreplace.substring(2,4);
+                            converted = converted.replaceAll(splitted[1], toreplace);
+                        }
+
+                        if(splitted[1].matches("[0-9]+D"))
+                        {
+                            int value = Integer.parseInt(splitted[1].replaceAll("D",""));
+                            String valhex = Integer.toHexString(value);
+                            String toreplace = FillString(4, valhex,'0');
+                            toreplace = toreplace.substring(0,2) + " " + toreplace.substring(2,4);
+                            converted = converted.replaceAll(splitted[1], toreplace);
+                        }
+                    }
+
                     break;
                 }
             }
@@ -363,6 +389,17 @@ public class Parser
 
         return converted;
     }
+    
+    //helper function to fill the string with specified character at the beginning
+    private String FillString(int len, String str, char c)
+    {
+        if(len<str.length()) len=str.length();
+        char[] z = new char[len - str.length()];
+        Arrays.fill(z,c);
+        String temp = new String(z);
+        return temp+str;
+    }
+
 
     public void ShowOriginalLines()
     {

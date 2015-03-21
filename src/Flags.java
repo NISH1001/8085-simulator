@@ -8,11 +8,11 @@ public class Flags extends Register {
         if (flag=="carry")
             return getBit(0);
         else if (flag=="parity")
-            return getBit(1);
+            return getBit(2);
         else if (flag=="auxcarry")
-            return getBit(3);
+            return getBit(4);
         else if (flag=="zero")
-            return getBit(5);
+            return getBit(6);
         else if (flag=="sign")
             return getBit(7);
         else
