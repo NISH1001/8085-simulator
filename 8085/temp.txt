@@ -1,2 +1,8 @@
-L1: JMP L1
+NOP
+MVI A, 99'd            ; 'd is used for decimal cuz just d will be ambigious as it can be hex too
+STA 9000                ;now little endian is added so just do it as normal way -> 900 is converted to 0900
+LXI H, 90 00            ;space is still allowed for convinience
+l1 : MOV B,M
+JMP L1  d                ; l1 and L1 are same label -> cases are ignored 
+ADI 01
 HLT

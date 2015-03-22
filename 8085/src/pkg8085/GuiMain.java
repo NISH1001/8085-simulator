@@ -292,7 +292,13 @@ public class GuiMain extends JFrame implements Runnable {
                 new MemoryModule(0x0000, 0x10000);
             int start_addr = (int)0x8000;
             MultipleParser mp = new MultipleParser(memory);
-            mp.initializeString(code,start_addr);
+            try {
+                mp.initializeString(code,start_addr);
+            } catch (IOException ex) {
+                Logger.getLogger(GuiMain.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ParseException ex) {
+                Logger.getLogger(GuiMain.class.getName()).log(Level.SEVERE, null, ex);
+            }
             proc = new Processor();
             proc.addDevice(memory);
             proc.setRegI("PC",0x8000);
