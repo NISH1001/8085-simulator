@@ -201,8 +201,12 @@ public class Processor implements Runnable {
             // 00XX X101 is DCR
             else if (ir.getBitrangeAsInt(0,2)==5) {
                 int reg = ir.getBitrangeAsInt(3,5);
+                // DCR leaves CY flag unaffected.
+                // hence this workaround.
+                boolean cyflag = alu.flags.getFlag("carry");
                 setRegFromCodeI(reg,alu.subtract(
                             getRegFromCodeI(reg),1));
+                alu.flags.setFlag("carry",cyflag);
             }
 
             // 00XX X110 is MVI
@@ -373,6 +377,7 @@ public class Processor implements Runnable {
 
         // If starts with 01, it is a MOV instruction
         else if (!irBits[7] && irBits[6]) {
+
             int dst = ir.getBitrangeAsInt(3,5);
             int src = ir.getBitrangeAsInt(0,2);
             regMov(dst,src);
@@ -438,9 +443,11 @@ public class Processor implements Runnable {
                 int reg = ir.getBitrangeAsInt(0,2);
                 alu.cmp(getRegI("A"),getRegFromCodeI(reg));
             }
+        }
+        else if (irBits[7] && irBits[6]) {
 
             // C9 is RET
-            else if (ir.getAsInt()==0xC9) {
+            if (ir.getAsInt()==0xC9) {
                 int retaddr = pop();
                 pc.setFromInt(retaddr);
             }
@@ -463,8 +470,8 @@ public class Processor implements Runnable {
             // 11XX X010 is JX (conditional jump)
             else if (ir.getAsInt()%0x8==2) {
                 int cond = ir.getBitrangeAsInt(3,5);
+                int retaddr = twoBytesFromMem();
                 if (alu.flags.check(cond)) {
-                    int retaddr = twoBytesFromMem();
                     pc.setFromInt(retaddr);
                 }
             }
@@ -478,8 +485,9 @@ public class Processor implements Runnable {
             // 11XX X100 is CX (conditional call)
             else if (ir.getAsInt()%0x8==4) {
                 int cond = ir.getBitrangeAsInt(3,5);
+                int addr = twoBytesFromMem();
                 if (alu.flags.check(cond)) {
-                    int addr = twoBytesFromMem(); push(addr);
+                    push(addr);
                     pc.setFromInt(addr);
                 }
             }

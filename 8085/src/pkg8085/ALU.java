@@ -25,7 +25,7 @@ public class ALU {
     public int twoscomplement(int b) {
         int bt = 0xFF & b;
         bt = 0xFF & ((0xFF-bt)+1);
-        return flags.adjust(bt);
+        return bt;
     }
 
     public int subtract(int first, int second) {

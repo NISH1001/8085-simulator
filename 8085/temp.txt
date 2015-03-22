@@ -1,2 +1,4 @@
-LDA 8000'd
-HLT
+MVI C,02
+l1: DCR C
+jnz l1
+hlt

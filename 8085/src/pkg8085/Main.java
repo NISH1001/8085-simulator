@@ -497,10 +497,25 @@ public class Main extends Application {
                     registerPC2value.setText(
                             Integer.toHexString(
                                 proc.getRegI("PC")%0x100));
+                    registerflagSvalue.setText(
+                        (proc.alu.flags.
+                         getFlag("sign")?"1":"0"));
+                    registerflagZvalue.setText(
+                        (proc.alu.flags.
+                         getFlag("zero")?"1":"0"));
+                    registerflagACvalue.setText(
+                        (proc.alu.flags.
+                         getFlag("auxcarry")?"1":"0"));
+                    registerflagPvalue.setText(
+                        (proc.alu.flags.
+                         getFlag("parity")?"1":"0"));
+                    registerflagCvalue.setText(
+                        (proc.alu.flags.
+                         getFlag("carry")?"1":"0"));
                 }
             }
         }));
-        
+
         updater.setCycleCount(Timeline.INDEFINITE);
         memory_table_update(start_addr);
 
@@ -516,8 +531,8 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
- 
-    
+
+
     public static void memory_table_update(int start_address){
         memory_data.clear();
         for(int i = start_address ; i < start_address+60 ; i++){

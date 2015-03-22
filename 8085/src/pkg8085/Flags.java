@@ -36,12 +36,9 @@ public class Flags extends Register {
 
     public int adjust(int result) {
         int res = 0xFF & result;
-        if (result==0)
-            setBit(6,true);
-        else if (result>0x7f)
-            setBit(7,true);
-        if (result>res)
-            setFlag("carry",true);
+        setBit(6,res==0);
+        setBit(7,res>0x7f);
+        setFlag("carry",result>res);
         boolean parity = false;
         while (result!=0) {
             if (result%2==1)
