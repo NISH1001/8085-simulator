@@ -8,7 +8,7 @@ public class Processor implements Runnable {
     public ALU alu;
     private HashMap<String,Register> registers;
     private ArrayList<Device> devices;
-    private boolean enable_intr;
+    private Boolean enable_intr,stopped,running;
 
     public Processor() {
         alu = new ALU();
@@ -28,6 +28,19 @@ public class Processor implements Runnable {
         registers.put("SP",new Register(2));
         setRegI("SP",0xFFFF);
         enable_intr = false;
+        stopped = false;
+        running = false;
+    }
+
+    public void stop() {
+        synchronized(stopped) {
+            stopped = true;
+        }
+    }
+
+    public boolean isRunning() {
+        synchronized (running) {
+        return running; }
     }
 
     public void addDevice(Device d) {
@@ -134,7 +147,17 @@ public class Processor implements Runnable {
 
     public void run() {
         Register pc = registers.get("PC");
+        synchronized(running) { running = true; }
+
     while (true) {
+
+        synchronized(stopped) {
+            if (stopped) {
+                stopped = false;
+                break;
+            }
+        }
+
         fetch();
         pc.setFromInt(pc.getAsInt()+1);
 
@@ -617,6 +640,7 @@ public class Processor implements Runnable {
         }
 
     } // end while
+        synchronized(running) { running = false; }
     }
 
     public void showRegs() {

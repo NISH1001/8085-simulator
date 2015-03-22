@@ -541,28 +541,28 @@ public class Main extends Application {
                 value_HEX = value_HEX.substring(value_HEX.length()-2) ;
             memory_data.add(new memorytableView( Integer.toString(i) , value_HEX )) ;
         }
-        
+ 
     }
-    
+
     public static void IO_table_update(int start_address){
         IO_data.clear();
         for(int i = start_address ; i < start_address+60 ; i++){
             String value_HEX = Integer.toHexString((int)memory.readByte(i)) ;
             IO_data.add(new memorytableView( Integer.toString(i) , value_HEX )) ;
         }
-        
+
     }
-    
+
     private void createMenuBar() {
         MenuBar menubar = new MenuBar();
 
         Menu file = new Menu("File");
         Menu more = new Menu("More");
-        
+
         MenuItem aboutBtn = new MenuItem("About") ;
         MenuItem fullscreen = new MenuItem("Fullscreen") ;
         fullscreen.setAccelerator(KeyCombination.keyCombination("Ctrl+shift+f"));
-        
+
         aboutBtn.setOnAction(e -> alertBox.displayAbout());
         fullscreen.setOnAction(e -> {
             if(mainStage.isFullScreen())
@@ -571,7 +571,7 @@ public class Main extends Application {
                 mainStage.setFullScreen(true);
                 });
         more.getItems().addAll(aboutBtn,fullscreen) ;
-        
+
         MenuItem item_f_new = new MenuItem("New");
         item_f_new.setOnAction((ActionEvent t)-> {NewFileAction();});
         item_f_new.setAccelerator(KeyCombination.keyCombination("Ctrl+n"));
@@ -696,6 +696,7 @@ public class Main extends Application {
                 editor = new TextArea() ;
                 
                 Button editor_run = new Button("RUN") ;
+                Button editor_stop = new Button("STOP") ;
                 Button editor_run_step = new Button("Step") ;
                 Button editor_run_step_next = new Button("Next") ;
                 Button editor_run_step_prev = new Button("Previous") ;
@@ -709,6 +710,10 @@ public class Main extends Application {
                 editor_run.setOnAction(e-> {
                     start_parser(editor);        
                 });
+                editor_stop.setOnAction(e->{
+                    if (proc.isRunning())
+                        proc.stop();
+                });
                 editor_run_step_next.setOnAction(e->{
                     if(true){//end of execution
                         editor_run_step_next.setVisible(false);
@@ -719,7 +724,10 @@ public class Main extends Application {
                 });
                 editor_run_step_prev.setOnAction(e->{});
                 
-                editor_button_box.getChildren().addAll(editor_run,editor_run_step,editor_run_step_prev,editor_run_step_next);
+                editor_button_box.getChildren().addAll(
+                        editor_run,editor_stop,editor_run_step,
+                        editor_run_step_prev,
+                        editor_run_step_next);
                 //        editor.setMinHeight(500);
                 editor_tab_box.getChildren().addAll(editor,editor_button_box) ;
                 

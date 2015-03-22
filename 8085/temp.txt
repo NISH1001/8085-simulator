@@ -1,4 +1,2 @@
-MVI C,02
-l1: DCR C
-jnz l1
-hlt
+L1: JMP L1
+HLT
