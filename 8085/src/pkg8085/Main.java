@@ -154,13 +154,16 @@ public class Main extends Application {
         //frame for top bar(eg about)
         topbar = new HBox() ;
         topbar.setPadding(new Insets(5,5,5,5));
+        topbar.getStyleClass().add("topbar") ;
         createMenuBar();
         
         //frame(tabs) for editor
+            VBox middleframe = new VBox() ;
                 editorframe = new TabPane();
                 editorframe.setPadding(new Insets(10,10,10,10));
+                editorframe.getStyleClass().add("forall");
                editortab primaryTab = new editortab() ;
-               
+            middleframe.getChildren().add(editorframe);
                
         //frame for showing memory //right panel as tab
            VBox left_panel = new VBox() ;
@@ -292,18 +295,21 @@ public class Main extends Application {
             //for error 
             show_error = new TextArea() ;
             show_error.setEditable(false);
-            show_error.setMaxWidth(2*130);
             VBox show_error_box = new VBox() ;
-            show_error_box.setPadding(new Insets(10,10,10,10));
-            show_error_box.setSpacing(10);
+            //show_error_box.getStyleClass().add("registershow");
+            show_error_box.setPadding(new Insets(10,5,10,10));
+            show_error_box.getStyleClass().add("error");
             show_error_box.getChildren().addAll(new Label("Errors"),show_error) ;
+            middleframe.getChildren().add(show_error_box);
             //added tabPane to the left panel 
-            left_panel.getChildren().addAll(tabPane,show_error_box) ;
+            left_panel.getChildren().addAll(tabPane) ;
+            left_panel.getStyleClass().add("forall");
 
             
             
         //frame for showing register
         GridPane registerframe = new GridPane();
+        registerframe.getStyleClass().add("forall");
         registerframe.setPadding(new Insets(10,10,10,10)) ;
         registerframe.setAlignment(Pos.TOP_LEFT);
         registerframe.setHgap(10);
@@ -439,8 +445,8 @@ public class Main extends Application {
         //border
         border = new BorderPane() ;
         border.setTop(topbar);
-        border.setCenter(editorframe);
-        border.setLeft(registerframe);
+        border.setCenter(middleframe);
+        border.setLeft(registerframe); 
         border.setRight(left_panel);
         Scene scene = new Scene(border, 1000, 600);
         scene.getStylesheets().add("pkg8085/general.css");

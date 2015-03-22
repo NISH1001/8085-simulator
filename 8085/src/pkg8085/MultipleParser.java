@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.StringReader;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MultipleParser {
 
@@ -47,16 +49,22 @@ public class MultipleParser {
         boolean success = true;
         for (CodeSegment seg : segments) {
             Parser p = new Parser();
-            if (p.InitializeString(seg.data,seg.address)) {
-
-                if (p.size()>0) {
-                    p.WriteToMemory(memory,seg.address);
-                    Integer sa = seg.address;
-                    p.ShowData();
+            try {
+                if (p.InitializeString(seg.data,seg.address)) {
+                    
+                    if (p.size()>0) {
+                        p.WriteToMemory(memory,seg.address);
+                        Integer sa = seg.address;
+                        p.ShowData();
+                    }
+                } else {
+                    success = false;
+                    break;
                 }
-            } else {
-                success = false;
-                break;
+            } catch (NumberFormatException ex) {
+                Logger.getLogger(MultipleParser.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(MultipleParser.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return success;

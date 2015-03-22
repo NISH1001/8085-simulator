@@ -47,6 +47,36 @@ and open the template in the editor.
 
 }
 
+.topbar {
+/*    -fx-background-image: url("graphics/arrow_t_up_right.png");
+    -fx-background-size: 96, 205;
+    -fx-background-repeat: no-repeat;*/
+/*    -fx-padding: 10;
+    -fx-spacing: 8;
+    -fx-background-color: #CCCCCC;*/
+
+}
+
+
+.forall {
+/*    -fx-background-image: url("graphics/arrow_t_up_right.png");
+    -fx-background-size: 96, 205;
+    -fx-background-repeat: no-repeat;*/
+/*    -fx-padding: 5;
+    -fx-spacing: 8;*/
+    -fx-background-color: whitesmoke;
+
+}
+
+.error {
+/*    -fx-background-image: url("graphics/arrow_t_up_right.png");
+    -fx-background-size: 96, 205;
+    -fx-background-repeat: no-repeat;*/
+   
+    
+    -fx-background-color: whitesmoke;
+
+}
 
 .about_border {
 /*    -fx-background-image: url("graphics/arrow_t_up_right.png");
