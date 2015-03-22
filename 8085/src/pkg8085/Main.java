@@ -671,51 +671,53 @@ public class Main extends Application {
             Thread proc_thread = new Thread(proc);
             proc_thread.start();
             memory_table_update(start_addr);
+            show_error.setText("");
         } } catch (Exception e) {
-            System.out.println("exception");
-            show_error.appendText(e.getMessage()+"\n");
+            show_error.setText(e.toString()+"\n"
+                    +show_error.getText());
         }
     }
 
     class editortab extends Tab {
-        
+
         public final TextArea editor ;
-        
+
         public editortab() {
                 setText("New Tab "+tabNum++);
                 setClosable(true);
-                
+
                 setOnCloseRequest(e->{
                     if(!alertBox.display_warning("Are you sure"))
                         e.consume();
                 });
-                
+
                 //vbox for both
                 VBox editor_tab_box = new VBox() ;
                 editor_tab_box.setSpacing(10);
-                
+
                 HBox editor_button_box = new HBox() ;
                 editor_button_box.setSpacing(10);
-                
-                
+
+
                 //textarea
                 editor = new TextArea() ;
-                
+
                 Button editor_run = new Button("RUN") ;
                 Button editor_stop = new Button("STOP") ;
                 Button editor_run_step = new Button("Step") ;
                 Button editor_run_step_next = new Button("Next") ;
                 Button editor_run_step_prev = new Button("Previous") ;
-                
-                
+
+
                 editor.setMinHeight(400);
-                
+
                 editor_run_step_next.setVisible(false);
                 editor_run_step_prev.setVisible(false);
-                
+
                 editor_run.setOnAction(e-> {
-                    start_parser(editor);        
+                    start_parser(editor);
                 });
+
                 editor_stop.setOnAction(e->{
                     if (proc.isRunning())
                         proc.stop();
@@ -725,18 +727,18 @@ public class Main extends Application {
                         editor_run_step_next.setVisible(false);
                         editor_run_step_prev.setVisible(false);
                     }else{
-                        
+
                     }
                 });
                 editor_run_step_prev.setOnAction(e->{});
-                
+
                 editor_button_box.getChildren().addAll(
                         editor_run,editor_stop,editor_run_step,
                         editor_run_step_prev,
                         editor_run_step_next);
                 //        editor.setMinHeight(500);
                 editor_tab_box.getChildren().addAll(editor,editor_button_box) ;
-                
+
                 setContent(editor_tab_box);
                 editorframe.getTabs().addAll(this) ;
         }
@@ -744,18 +746,13 @@ public class Main extends Application {
         public void seteditor(String text) {
             editor.setText(text);
         }
-        
+
         public String geteditor() {
             return editor.getText();
         }
     }
-    
-    
-    
-    
-    
-    
-    
+
+
 class EditingCell extends TableCell<memorytableView, String> {
  
         private TextField textField;

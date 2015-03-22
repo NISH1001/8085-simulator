@@ -35,7 +35,7 @@ public class MultipleParser {
     }
 
     public boolean initializeString(String data, int defAddr)
-    throws IOException,ParseException {
+    throws IOException,ParseException,NumberFormatException {
         //try {
         def_addr = defAddr;
         split(new BufferedReader(new StringReader(data)));
@@ -45,13 +45,14 @@ public class MultipleParser {
         }*/
     }
 
-    private boolean parse() throws ParseException {
+    private boolean parse()
+    throws ParseException,NumberFormatException,IOException {
+
         boolean success = true;
         for (CodeSegment seg : segments) {
             Parser p = new Parser();
-            try {
+            //try {
                 if (p.InitializeString(seg.data,seg.address)) {
-                    
                     if (p.size()>0) {
                         p.WriteToMemory(memory,seg.address);
                         Integer sa = seg.address;
@@ -61,11 +62,11 @@ public class MultipleParser {
                     success = false;
                     break;
                 }
-            } catch (NumberFormatException ex) {
+            /*} catch (NumberFormatException ex) {
                 Logger.getLogger(MultipleParser.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(MultipleParser.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            }*/
         }
         return success;
     }

@@ -9,6 +9,9 @@ public class Processor implements Runnable {
     private HashMap<String,Register> registers;
     private ArrayList<Device> devices;
     private Boolean enable_intr,stopped,running;
+    private Boolean trap,r7,r6,r5;
+    private Boolean mr7,mr6,mr5;
+    private Boolean sid,sod;
 
     public Processor() {
         alu = new ALU();
@@ -27,9 +30,23 @@ public class Processor implements Runnable {
         registers.put("MAR",new Register(2));
         registers.put("SP",new Register(2));
         setRegI("SP",0xFFFF);
-        enable_intr = false;
-        stopped = false;
-        running = false;
+        enable_intr = false; stopped = false; running = false;
+        trap = false; r7 = false; r6 = false; r5 = false;
+        mr7 = true; mr6 = true; mr5 = true;
+        sid = false; sod = false;
+    }
+
+    // Send an interrupt externally. code means:
+    // 0:TRAP, 1:7.5 2:6.5 3:5.5
+    public void inter(int code) {
+        if (code==0)
+            synchronized(trap) { trap = true; }
+        else if (code==1)
+            synchronized(r7) { r7 = true; }
+        else if (code==2)
+            synchronized(r6) { r6 = true; }
+        else if (code==3)
+            synchronized(r5) { r5 = true; }
     }
 
     public void stop() {
@@ -151,12 +168,29 @@ public class Processor implements Runnable {
 
     while (true) {
 
-        synchronized(stopped) {
-            if (stopped) {
+        synchronized(stopped) { if (stopped) {
                 stopped = false;
                 break;
-            }
-        }
+        }}
+        synchronized(trap) { if (trap) {
+            push(pc.getAsInt());
+            enable_intr = false;
+            pc.setFromInt(0x24);
+        }}
+        synchronized(r7) { if (r7 && !mr7 && enable_intr) {
+            push(pc.getAsInt());
+            mr6 = true; mr5 = true;
+            pc.setFromInt(0x3C);
+        }}
+        synchronized(r6) { if (r6 && !mr6 && enable_intr) {
+            push(pc.getAsInt());
+            mr5 = true;
+            pc.setFromInt(0x34);
+        }}
+        synchronized(r5) { if (r5 && !mr5 && enable_intr) {
+            push(pc.getAsInt());
+            pc.setFromInt(0x2C);
+        }}
 
         fetch();
         pc.setFromInt(pc.getAsInt()+1);
@@ -394,7 +428,46 @@ public class Processor implements Runnable {
                 // The case of rp==3 is INX SP, already dealt
             }
 
-            // TODO DAA, RIM, SIM
+            // 30 is SIM
+            else if (ir.getAsInt()==0x30) {
+                int acc = getRegI("A");
+                // If Serial Data enable, output SOD
+                if ((acc&0x40)!=0)
+                    sod = (acc&0x80)!=0;
+
+                // If bit D4 is set, reset R7.5
+                if ((acc&0x10)!=0)
+                    r7 = false;
+
+                // If mask set enabled, mask the interrupts
+                if ((acc&0x08)!=0) {
+                    if ((acc&0x04)!=0) mr7 = true;
+                    else mr7 = false;
+                    if ((acc&0x02)!=0) mr6 = true;
+                    else mr6 = false;
+                    if ((acc&0x01)!=0) mr5 = true;
+                    else mr5 = false;
+                }
+            }
+
+            // 20 is RIM
+            else if (ir.getAsInt()==0x20) {
+                int sttus = 0;
+                // Read SiD to D7
+                sttus = sttus | (sid?0x80:0x00);
+                // Read interrupt bits
+                sttus = sttus | (r7?0x40:0x00);
+                sttus = sttus | (r6?0x20:0x00);
+                sttus = sttus | (r5?0x10:0x00);
+                // Read IE
+                sttus = sttus | (enable_intr?0x08:0x00);
+                // Read interrupt mask bits
+                sttus = sttus | (mr7?0x04:0x00);
+                sttus = sttus | (mr6?0x02:0x00);
+                sttus = sttus | (mr5?0x01:0x00);
+                // Put to Accumulator
+                setRegI("A",sttus);
+            }
         }
 
 
