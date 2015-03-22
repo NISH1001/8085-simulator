@@ -7,3 +7,4 @@ build/
 *.swp
 .vim_session_
 icons
+/8085/dist/

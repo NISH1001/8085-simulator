@@ -1,3 +1,5 @@
+package pkg8085;
+
 public class MemoryModule implements Device {
 
     private int start_addr,addr_size;

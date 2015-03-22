@@ -1,3 +1,5 @@
+package pkg8085;
+
 public class Register {
 
     protected int[] data;

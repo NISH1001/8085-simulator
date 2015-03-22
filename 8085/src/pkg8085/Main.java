@@ -42,7 +42,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import pkg8085.core.*;
 
 /**
  *
@@ -204,7 +203,7 @@ public class Main extends Application {
                         int start_addr = 8000;
 
                         //if parser is successful get memory
-                        if(p.Initialize("temp.txt", start_addr))
+                        if(p.InitializeFile("temp.txt", start_addr))
                         {
                             p.WriteToMemory(memory, start_addr);
                                 //initial table from 8000
@@ -559,9 +558,9 @@ public class Main extends Application {
         int start_addr = 8000;
 
         //if parser is successful get memory
-        if(p.Initialize("test.txt", start_addr))
+        if(p.InitializeFile("test.txt", start_addr))
         {
-            p.ShowOriginalLines(editor);
+            p.ShowOriginalLines();
             System.out.println("--------------------------");
             p.ShowData();
             p.WriteToMemory(memory, start_addr);

@@ -1,3 +1,5 @@
+package pkg8085;
+
 public class Flags extends Register {
 
     public Flags() {
