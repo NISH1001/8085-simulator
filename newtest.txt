@@ -4,4 +4,5 @@ STA 9000                ;now little endian is added so just do it as normal way 
 LXI H, 90 00            ;space is still allowed for convinience
 l1 : MOV B,M
 JMP L1                  ; l1 and L1 are same label -> cases are ignored 
+ADI 01
 HLT
