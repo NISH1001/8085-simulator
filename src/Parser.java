@@ -305,6 +305,7 @@ public class Parser
         Iterator <Map.Entry<Integer, String>> iter = opcode.onebyte.entrySet().iterator();
 
         //for converted line into hexcode
+        line = line.replaceFirst("\\s*,\\s*", ",");
         String converted = line;
         boolean matched = false;
 
@@ -313,10 +314,14 @@ public class Parser
         {
             Map.Entry<Integer, String> opcode = iter.next();
             String hexcode = Integer.toHexString(opcode.getKey());
-            String engcode = opcode.getValue();
+            String engcode = opcode.getValue().toUpperCase();
 
             //search for substring like MOV A,B
-            matched = line.toUpperCase().contains(engcode.toUpperCase());
+            int index = line.indexOf(engcode);
+            if(index > 0)
+                matched = (line.charAt(index-1) == ' ') ? true : false;
+            else
+                matched = (index == 0) ? true : false;
 
             //if line contains instruction then replace with hex value
             if(matched)
@@ -335,9 +340,9 @@ public class Parser
             {
                 Map.Entry<Integer, String> opcode = iter.next();
                 String hexcode = Integer.toHexString(opcode.getKey());
-                String engcode = opcode.getValue();
+                String engcode = opcode.getValue().toUpperCase();
 
-                matched = line.toUpperCase().contains(engcode.toUpperCase());
+                matched = line.contains(engcode);
 
                 if(matched)
                 {
@@ -356,7 +361,6 @@ public class Parser
                     break;
                 }
             }
-
         }
 
         //if two  byte instruciton failed -> do same for three  byte instruction
@@ -368,9 +372,8 @@ public class Parser
             {
                 Map.Entry<Integer, String> opcode = iter.next();
                 String hexcode = Integer.toHexString(opcode.getKey());
-                String engcode = opcode.getValue();
-
-                matched = line.toUpperCase().contains(engcode.toUpperCase());
+                String engcode = opcode.getValue().toUpperCase();
+                matched = line.contains(engcode);
 
                 if(matched)
                 {
@@ -397,13 +400,10 @@ public class Parser
                             converted = converted.replaceAll(splitted[1], toreplace);
                         }
                     }
-
                     break;
                 }
             }
-
         }
-
         return converted;
     }
     
@@ -421,18 +421,14 @@ public class Parser
     public void ShowOriginalLines()
     {
         for(String o : m_originalLines)
-        {
             System.out.println(o);
-        }
     }
 
     //to show parsed data
     public void ShowData()
     {
         for (Integer d : data)
-        {
             System.out.println(Integer.toHexString(d));
-        }
     }
 
     //to write to memory
