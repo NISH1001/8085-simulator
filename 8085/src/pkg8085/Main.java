@@ -6,7 +6,12 @@
 package pkg8085;
 
  
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +22,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,6 +30,9 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
@@ -31,22 +40,31 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+//import pkg8085.core.*;
 
 /**
  *
  * @author navin
  */
+
+
+
+
+
+
 public class Main extends Application {
    
     
@@ -82,12 +100,18 @@ public class Main extends Application {
     
    
      
-    BorderPane border ;
+    static BorderPane border ;
     static MemoryModule memory ;
-    TableView<memorytableView> memory_table ;
-    TableView<memorytableView> IO_table ;
+    static TableView<memorytableView> memory_table ;
+    static TableView<memorytableView> IO_table ;
     static final ObservableList<memorytableView> memory_data = FXCollections.observableArrayList();
     static final ObservableList<memorytableView> IO_data = FXCollections.observableArrayList();
+    static TabPane editorframe ;
+    static HBox topbar;
+    static Stage mainStage ;
+    static int tabNum = 1 ;
+    static Parser parser ;
+
     
     //register lable
                     static Label registerAvalue = new Label("00") ;                    
@@ -125,132 +149,20 @@ public class Main extends Application {
         
         Label registerlabel = new Label("Register") ;
         Label flaglabel = new Label("Flag") ;
-        Button aboutBtn = new Button("About") ;
-        ToggleButton fullscreen = new ToggleButton("Fullscreen") ;
-        Button btn2 = new Button("2 bro") ;
-        
-        
-         
-        //action of elements
-        aboutBtn.setOnAction(e -> alertBox.displayAbout());
-        fullscreen.setOnAction(e -> {
-            if(primaryStage.isFullScreen())
-                primaryStage.setFullScreen(false);
-            else
-                primaryStage.setFullScreen(true);
-                });
+       
         
         //frame for top bar(eg about)
-        HBox topbar = new HBox() ;
+        topbar = new HBox() ;
         topbar.setPadding(new Insets(5,5,5,5));
-        topbar.getChildren().addAll(aboutBtn,fullscreen) ;
+        createMenuBar();
         
         //frame(tabs) for editor
-                TabPane editorframe = new TabPane();
+                editorframe = new TabPane();
                 editorframe.setPadding(new Insets(10,10,10,10));
 
-                //tabs
-                Tab editor_tab = new Tab("              Editor                                ") ;
-                editor_tab.setClosable(false);
-                Tab hexeditor_tab = new Tab("              Hex                                ") ;
-                hexeditor_tab.setClosable(false);
-
-                //vbox for both
-                VBox editor_tab_box = new VBox() ;
-                editor_tab_box.setSpacing(10);
-                
-                VBox hexeditor_tab_box = new VBox() ;
-                hexeditor_tab_box.setMinHeight(800);
-                hexeditor_tab_box.setSpacing(10);
-                
-                HBox editor_button_box = new HBox() ;
-                HBox hexeditor_button_box = new HBox() ;
-                editor_button_box.setSpacing(10);
-                hexeditor_button_box.setSpacing(10);
-                
-                //textarea
-                TextArea editor = new TextArea() ;
-                TextArea hexeditor = new TextArea() ;
-                
-                Button editor_run = new Button("RUN") ;
-                Button hexeditor_run = new Button("RUN") ;
-                Button editor_run_step = new Button("Step") ;
-                Button hexeditor_run_step = new Button("Step") ;
-                Button editor_run_step_next = new Button("Next") ;
-                Button hexeditor_run_step_next = new Button("Next") ;
-                Button editor_run_step_prev = new Button("Previous") ;
-                Button hexeditor_run_step_prev = new Button("Previous") ;
-                
-                
-                editor.setMinHeight(400);
-                hexeditor.setMinHeight(400);
-                
-                editor_run_step_next.setVisible(false);
-                editor_run_step_prev.setVisible(false);
-                hexeditor_run_step_next.setVisible(false);
-                hexeditor_run_step_prev.setVisible(false);
-                
-                editor_run.setOnAction(e-> {
-                            try {
-                                PrintWriter just_write = new PrintWriter("temp.txt");
-                                just_write.println(editor.getText());
-                                just_write.close();
-                            } catch (FileNotFoundException ex) {
-                                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        Parser p = new Parser();
-
-                        int start_addr = 8000;
-
-                        //if parser is successful get memory
-                        if(p.InitializeFile("temp.txt", start_addr))
-                        {
-                            p.WriteToMemory(memory, start_addr);
-                                //initial table from 8000
-                               memory_table_update(start_addr);
-                        }
-
-            
-                });
-                hexeditor_run.setOnAction(e-> {});
-                editor_run_step.setOnAction(e->{
-                    editor_run_step_next.setVisible(true);
-                    editor_run_step_prev.setVisible(true);
-                    //other method here ..loading to memory kind of stuff
-                }) ;
-                hexeditor_run_step.setOnAction(e->{
-                    hexeditor_run_step_next.setVisible(true);
-                    hexeditor_run_step_prev.setVisible(true);
-                    //other method here ..loading to memory kind of stuff
-                }) ;
-                editor_run_step_next.setOnAction(e->{
-                    if(true){//end of execution
-                        editor_run_step_next.setVisible(false);
-                        editor_run_step_prev.setVisible(false);
-                    }else{
-                        
-                    }
-                });
-                hexeditor_run_step_next.setOnAction(e->{
-                    if(true){//end of execution
-                        hexeditor_run_step_next.setVisible(false);
-                        hexeditor_run_step_prev.setVisible(false);
-                    }else{
-                        
-                    }
-                });
-                editor_run_step_prev.setOnAction(e->{});
-                hexeditor_run_step_prev.setOnAction(e->{});
-                
-                editor_button_box.getChildren().addAll(editor_run,editor_run_step,editor_run_step_prev,editor_run_step_next);
-                hexeditor_button_box.getChildren().addAll(hexeditor_run,hexeditor_run_step,hexeditor_run_step_prev,hexeditor_run_step_next);
-//        editor.setMinHeight(500);
-                editor_tab_box.getChildren().addAll(editor,editor_button_box) ;
-                hexeditor_tab_box.getChildren().addAll(hexeditor,hexeditor_button_box) ;
-                
-                editor_tab.setContent(editor_tab_box);
-                hexeditor_tab.setContent(hexeditor_tab_box);
-                editorframe.getTabs().addAll(editor_tab,hexeditor_tab) ;
+               editortab primaryTab = new editortab() ;
+               
+               
         
         //frame for showing memory //right panel as tab
            VBox left_panel = new VBox() ;
@@ -543,35 +455,35 @@ public class Main extends Application {
             //maximize
         Screen screen = Screen.getPrimary();
         Rectangle2D bounds = screen.getVisualBounds();
-
-        primaryStage.setX(bounds.getMinX());
-        primaryStage.setY(bounds.getMinY());
-        primaryStage.setWidth(bounds.getWidth());
-        primaryStage.setHeight(bounds.getHeight());
+        mainStage = new Stage() ;
+        mainStage.setX(bounds.getMinX());
+        mainStage.setY(bounds.getMinY());
+        mainStage.setWidth(bounds.getWidth());
+        mainStage.setHeight(bounds.getHeight());
         
         
         
         //
         //parser object
-        Parser p = new Parser();
+        parser = new Parser();
 
         int start_addr = 8000;
 
         //if parser is successful get memory
-        if(p.InitializeFile("test.txt", start_addr))
+        if(parser.InitializeFile("temp.txt", start_addr))
         {
-            p.ShowOriginalLines();
+            parser.ShowOriginalLines();
             System.out.println("--------------------------");
-            p.ShowData();
-            p.WriteToMemory(memory, start_addr);
+            parser.ShowData();
+            parser.WriteToMemory(memory, start_addr);
                 //initial table from 8000
                memory_table_update(start_addr);
         }
 
         
-        primaryStage.setTitle("8085 Simulator :P");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        mainStage.setTitle("8085 Simulator :P");
+        mainStage.setScene(scene);
+        mainStage.show();
     }
 
     /**
@@ -602,14 +514,184 @@ public class Main extends Application {
         
     }
     
+    private void createMenuBar() {
+        MenuBar menubar = new MenuBar();
+
+        Menu file = new Menu("File");
+        Menu more = new Menu("More");
+        
+        MenuItem aboutBtn = new MenuItem("About") ;
+        MenuItem fullscreen = new MenuItem("Fullscreen") ;
+        fullscreen.setAccelerator(KeyCombination.keyCombination("Ctrl+shift+f"));
+        
+        aboutBtn.setOnAction(e -> alertBox.displayAbout());
+        fullscreen.setOnAction(e -> {
+            if(mainStage.isFullScreen())
+                mainStage.setFullScreen(false);
+            else
+                mainStage.setFullScreen(true);
+                });
+        more.getItems().addAll(aboutBtn,fullscreen) ;
+        
+        MenuItem item_f_new = new MenuItem("New");
+        item_f_new.setOnAction((ActionEvent t)-> {NewFileAction();});
+        item_f_new.setAccelerator(KeyCombination.keyCombination("Ctrl+n"));
+        MenuItem item_f_open = new MenuItem("Open");
+        item_f_open.setAccelerator(KeyCombination.keyCombination("Ctrl+o"));
+        item_f_open.setOnAction(e -> {
+                try {
+                    OpenFileAction();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
+        });
+        MenuItem item_f_save = new MenuItem("Save");
+        item_f_save.setAccelerator(KeyCombination.keyCombination("Ctrl+s"));
+        item_f_save.setOnAction(e -> {
+            saveFileAction();
+        });
+        MenuItem item_f_exit = new MenuItem("Exit");
+        item_f_exit.setAccelerator(KeyCombination.keyCombination("Ctrl+q"));
+        item_f_exit.setOnAction(e -> {
+                  System.exit(0);
+        } );
+
+        file.getItems().addAll(item_f_new,item_f_open,item_f_save,item_f_exit);
+        
+        menubar.getMenus().addAll(file,more);
+        topbar.getChildren().addAll(menubar);
+    }
+    
+    public void  OpenFileAction() throws FileNotFoundException, IOException  {
+            FileChooser fdia = new FileChooser();
+            ExtensionFilter filter = new ExtensionFilter(
+                    "Assembly files", "asm" , "txt");
+            fdia.setSelectedExtensionFilter(filter);
+             File file = fdia.showOpenDialog(mainStage);
+            if (file != null) {
+                editortab opentab = new editortab();
+                opentab.setText(file.getName());
+                BufferedReader reader = new BufferedReader( new FileReader(file.getAbsolutePath()));
+                String text = "" , line ;
+                while((line = reader.readLine()) != null){
+                    text += line+"\n" ;
+                }
+                opentab.seteditor(text);
+            }
+        
+    }
     
     
+    public void saveFileAction(){
+              FileChooser fileChooser = new FileChooser();
+  
+              //Set extension filter
+              FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+              fileChooser.getExtensionFilters().add(extFilter);
+              
+              //Show save file dialog
+              File file = fileChooser.showSaveDialog(mainStage);
+              
+              if(file != null){
+                  String string = ((editortab)editorframe.getSelectionModel().getSelectedItem()).geteditor() ;
+                  System.out.print(string);
+                  SaveFile(string, file);
+              }
+    }
+    public void NewFileAction()  {
+        editortab editortab = new editortab();
+    }
+     
+    
+            public void start_parser(TextArea editor){
+                    try {
+                        PrintWriter just_write = new PrintWriter("temp.txt");
+                        just_write.println(editor.getText());
+                        just_write.close();
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                Parser p = new Parser();
+
+                int start_addr = 8000;
+
+                //if parser is successful get memory
+                if(p.InitializeFile("temp.txt", start_addr))
+                {
+                    p.WriteToMemory(memory, start_addr);
+                        //initial table from 8000
+                       memory_table_update(start_addr);
+                }
+            }
+
     
     
-    
-    
-    
-    
+    class editortab extends Tab {
+        
+        public final TextArea editor ;
+        
+        public editortab() {
+                setText("New Tab "+tabNum++);
+                setClosable(true);
+                
+                setOnCloseRequest(e->{
+                    if(!alertBox.display_warning("Are you sure"))
+                        e.consume();
+                });
+                
+                //vbox for both
+                VBox editor_tab_box = new VBox() ;
+                editor_tab_box.setSpacing(10);
+                
+                HBox editor_button_box = new HBox() ;
+                editor_button_box.setSpacing(10);
+                
+                
+                //textarea
+                editor = new TextArea() ;
+                
+                Button editor_run = new Button("RUN") ;
+                Button editor_run_step = new Button("Step") ;
+                Button editor_run_step_next = new Button("Next") ;
+                Button editor_run_step_prev = new Button("Previous") ;
+                
+                
+                editor.setMinHeight(400);
+                
+                editor_run_step_next.setVisible(false);
+                editor_run_step_prev.setVisible(false);
+                
+                editor_run.setOnAction(e-> {
+                    start_parser(editor);        
+                });
+                editor_run_step_next.setOnAction(e->{
+                    if(true){//end of execution
+                        editor_run_step_next.setVisible(false);
+                        editor_run_step_prev.setVisible(false);
+                    }else{
+                        
+                    }
+                });
+                editor_run_step_prev.setOnAction(e->{});
+                
+                editor_button_box.getChildren().addAll(editor_run,editor_run_step,editor_run_step_prev,editor_run_step_next);
+                //        editor.setMinHeight(500);
+                editor_tab_box.getChildren().addAll(editor,editor_button_box) ;
+                
+                setContent(editor_tab_box);
+                editorframe.getTabs().addAll(this) ;
+        }
+
+        public void seteditor(String text) {
+            editor.setText(text);
+        }
+        
+        public String geteditor() {
+            return editor.getText();
+        }
+    }
     
     
     
@@ -664,6 +746,9 @@ class EditingCell extends TableCell<memorytableView, String> {
             }
         }
  
+        
+        
+    
         private void createTextField() {
             textField = new TextField(getString());
             textField.setMinWidth(this.getWidth() - this.getGraphicTextGap()* 2);
@@ -694,4 +779,17 @@ class EditingCell extends TableCell<memorytableView, String> {
             return getItem() == null ? "" : getItem();
         }
     }    
+
+     private void SaveFile(String content, File file){
+        try {
+            FileWriter fileWriter = null;
+             
+            fileWriter = new FileWriter(file);
+            fileWriter.write(content);
+            fileWriter.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+         
+    }
 }

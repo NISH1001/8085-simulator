@@ -22,6 +22,8 @@ public class alertBox {
     
     static Stage window ;
     static Scene scene ;
+    static boolean result ; 
+
             
     public static void displayAbout(){
        window = new Stage() ;
@@ -52,5 +54,38 @@ public class alertBox {
        window.showAndWait();
        
        
+    }
+    
+    public static boolean display_warning(String warning){
+       window = new Stage() ;
+       window.initModality(Modality.APPLICATION_MODAL);
+       window.setTitle("Warning");
+       window.setMinWidth(100);
+       result = false ;
+       
+       Label header = new Label(warning);
+       Button yesButton = new Button("Yes") ;
+       Button  noButton = new Button("No") ;
+ 
+
+       yesButton.setOnAction(e -> {
+           result = true ;
+           window.close();
+        });
+       
+       noButton.setOnAction(e -> {
+           window.close();
+       });
+       
+       VBox layout = new VBox(10) ;
+       layout.getChildren().addAll(header ,yesButton,noButton) ;
+       layout.getStyleClass().add("about_border") ;
+       layout.setAlignment(Pos.CENTER);
+       
+       scene = new Scene(layout,200,200);
+       scene.getStylesheets().add("helloworld/general.css");       
+       window.setScene(scene);
+       window.showAndWait();
+       return result ;
     }
 }
