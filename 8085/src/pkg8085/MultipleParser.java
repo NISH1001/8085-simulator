@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.StringReader;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 
 public class MultipleParser {
 
@@ -19,28 +20,31 @@ public class MultipleParser {
         memory = mem;
     }
 
-    public void initializeFile(String filename, int defAddr) {
-        try {
+    public boolean initializeFile(String filename,int defAddr)
+    throws IOException, FileNotFoundException, ParseException{
+        //try {
         def_addr = defAddr;
         split(new BufferedReader(new FileReader(filename)));
-        parse();
-        } catch (Exception e) {
+        return parse();
+        /*} catch (Exception e) {
             System.out.println(e);
             e.printStackTrace();
-        }
+        }*/
     }
 
-    public void initializeString(String data, int defAddr) {
-        try {
+    public boolean initializeString(String data, int defAddr)
+    throws IOException,ParseException {
+        //try {
         def_addr = defAddr;
         split(new BufferedReader(new StringReader(data)));
-        parse();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+        return parse();
+        /*} catch (Exception e) {
+            throw e;
+        }*/
     }
 
-    private void parse() {
+    private boolean parse() throws ParseException {
+        boolean success = true;
         for (CodeSegment seg : segments) {
             Parser p = new Parser();
             if (p.InitializeString(seg.data,seg.address)) {
@@ -50,9 +54,12 @@ public class MultipleParser {
                     Integer sa = seg.address;
                     p.ShowData();
                 }
-
+            } else {
+                success = false;
+                break;
             }
         }
+        return success;
     }
 
     private void split(BufferedReader breader)

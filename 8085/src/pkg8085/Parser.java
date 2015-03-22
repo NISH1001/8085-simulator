@@ -35,6 +35,7 @@ public class Parser
 
     public boolean InitializeFile(String filename,
             int start_addr)
+        throws NumberFormatException,IOException,ParseException
     {
         boolean first = FirstPass(filename, start_addr,true);
         if(!first)
@@ -47,6 +48,7 @@ public class Parser
     }
 
     public boolean InitializeString(String data,int start_addr)
+        throws NumberFormatException,IOException,ParseException
     {
         if (!FirstPass(data,start_addr,false))
             return false;
@@ -57,12 +59,12 @@ public class Parser
 
     public boolean FirstPass(String filename,
             int start_address, boolean isFilename)
+        throws NumberFormatException,IOException,ParseException
     {
         int start_addr = (int)start_address;
         int linenumber = 0;
         String line = new String();
-        try
-        {
+        //try {
             BufferedReader reader;
             if (isFilename)
                 reader = new BufferedReader(
@@ -163,8 +165,8 @@ public class Parser
             }
 
             reader.close();
-        }
-        catch ( IOException e)
+        //}
+        /*catch ( IOException e)
         {
             System.out.println("invalid file");
             return false;
@@ -178,14 +180,13 @@ public class Parser
         {
             System.out.println(err.getMessage());
             return false;
-        }
+        }*/
         return true;
     }
 
-    public boolean SecondPass()
+    public boolean SecondPass() throws ParseException
     {
-        try
-        {
+        //try {
             int linenumber = 0;
             while(linenumber < m_parsedLines.size())
             {
@@ -260,13 +261,13 @@ public class Parser
                     data.add(codes[i]);
                 }
             }
-        }
+        //}
 
-        catch (ParseException err)
+        /*catch (ParseException err)
         {
             System.out.println(err.getMessage());
             return false;
-        }
+        }*/
         return true;
     }
 
@@ -355,7 +356,7 @@ public class Parser
                     //replae first occurence of *,* with just a space
                     line = line.replaceFirst("\\s*,\\s*", " ");
                     converted = line.replaceAll(engcode, hexcode);
-                    
+
                     //if it is a decimal data ie suffexed wit 'd'
                     String[] splitted = converted.split(" ");
                     if(splitted[1].matches("[0-9]+'D"))
@@ -412,7 +413,7 @@ public class Parser
         }
         return converted;
     }
-    
+
     //helper function to fill the string with specified character at the beginning
     private String FillString(int len, String str, char c)
     {
@@ -440,12 +441,12 @@ public class Parser
     //to write to memory
     public void WriteToMemory(MemoryModule mem, int start_addr)
     {
-       int i = 0;
-       for(Integer d : data)
-       {
-           mem.writeByte(start_addr+i, d);
-           i++;
-       }
+        int i = 0;
+        for(Integer d : data)
+        {
+            mem.writeByte(start_addr+i, d);
+            i++;
+        }
     }
 
     // Return the size

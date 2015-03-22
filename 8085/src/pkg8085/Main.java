@@ -63,11 +63,6 @@ import javafx.animation.KeyFrame;
  * @author navin
  */
 
-
-
-
-
-
 public class Main extends Application {
    
     
@@ -115,29 +110,30 @@ public class Main extends Application {
     static Stage mainStage ;
     static int tabNum = 1 ;
     static Parser parser ;
+    static TextArea show_error;
+    static int start_addr = 0x8000;
 
-    
+
     //register lable
-                    static Label registerAvalue = new Label("00") ;                    
-                    static Label registerBvalue = new Label("00") ;    
-                    static Label registerCvalue = new Label("00") ;
-                    static Label registerDvalue = new Label("00") ;
-                    static Label registerEvalue = new Label("00") ;
-                    static Label registerHvalue = new Label("00") ;
-                    static Label registerLvalue = new Label("00") ;
-                    static Label registerPvalue = new Label("00") ;
-                    static Label registerWvalue = new Label("00") ;
-                    static Label registerPC1value = new Label("00") ;
-                    static Label registerPC2value = new Label("00") ;
-                    static Label registerSP1value = new Label("00") ;
-                    static Label registerSP2value = new Label("00") ;
-                    
-    //PPi label
-                    static Label ppiCWvalue = new Label("00") ;
-                    static Label ppiPAvalue = new Label("00");
-                    static Label ppiPBvalue = new Label("00");
-                    static Label ppiPCvalue = new Label("00");
+            static Label registerAvalue = new Label("00") ;
+            static Label registerBvalue = new Label("00") ;
+            static Label registerCvalue = new Label("00") ;
+            static Label registerDvalue = new Label("00") ;
+            static Label registerEvalue = new Label("00") ;
+            static Label registerHvalue = new Label("00") ;
+            static Label registerLvalue = new Label("00") ;
+            static Label registerPvalue = new Label("00") ;
+            static Label registerWvalue = new Label("00") ;
+            static Label registerPC1value = new Label("00") ;
+            static Label registerPC2value = new Label("00") ;
+            static Label registerSP1value = new Label("00") ;
+            static Label registerSP2value = new Label("00") ;
 
+    //PPi label
+            static Label ppiCWvalue = new Label("00") ;
+            static Label ppiPAvalue = new Label("00");
+            static Label ppiPBvalue = new Label("00");
+            static Label ppiPCvalue = new Label("00");
 
     
     @Override
@@ -294,7 +290,7 @@ public class Main extends Application {
             
             
             //for error 
-            TextArea show_error = new TextArea() ;
+            show_error = new TextArea() ;
             show_error.setEditable(false);
             show_error.setMaxWidth(2*130);
             VBox show_error_box = new VBox() ;
@@ -306,10 +302,6 @@ public class Main extends Application {
 
             
             
-            
-        
-        
-        
         //frame for showing register
         GridPane registerframe = new GridPane();
         registerframe.setPadding(new Insets(10,10,10,10)) ;
@@ -469,8 +461,6 @@ public class Main extends Application {
         //parser object
         //parser = new Parser();
 
-        int start_addr = 0x8000;
-
         /*if parser is successful get memory
         if(parser.InitializeFile("temp.txt", start_addr))
         {
@@ -512,6 +502,7 @@ public class Main extends Application {
         }));
         
         updater.setCycleCount(Timeline.INDEFINITE);
+        memory_table_update(start_addr);
 
         mainStage.setTitle("8085 Simulator :P");
         mainStage.setScene(scene);
@@ -652,17 +643,19 @@ public class Main extends Application {
                     log(Level.SEVERE, null, ex);
             }
 
-        int start_addr = 0x8000;
         MultipleParser mp = new MultipleParser(memory);
-        mp.initializeString(editor.getText(),start_addr);
-        proc.setRegI("PC",start_addr);
-        Thread proc_thread = new Thread(proc);
-        proc_thread.start();
-        memory_table_update(start_addr);
+        try {
+        if (mp.initializeString(editor.getText(),start_addr)){
+            proc.setRegI("PC",start_addr);
+            Thread proc_thread = new Thread(proc);
+            proc_thread.start();
+            memory_table_update(start_addr);
+        } } catch (Exception e) {
+            System.out.println("exception");
+            show_error.appendText(e.getMessage()+"\n");
+        }
     }
 
-    
-    
     class editortab extends Tab {
         
         public final TextArea editor ;

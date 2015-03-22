@@ -1,3 +1,2 @@
-LXI H,1234
-INX D
+LDA 8000'd
 HLT
