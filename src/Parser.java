@@ -99,17 +99,21 @@ public class Parser
                     }
 
                     line = line.toUpperCase();
+                    String [] labelsplit = line.split(":");
+                    if(labelsplit.length == 2)
+                        line = ConvertToHex(labelsplit[1].trim());
+                    else
+                        line  = ConvertToHex(line);
 
                     //convert to hex opcodes
-                    line  = ConvertToHex(line);
                     String label = "";
 
                     //check if there is a label
-                    if(line.indexOf(":")>0)
+                    if(labelsplit.length == 2)
                     {
                         String[] labelsplitted = line.split(":");
-                        String l1 = labelsplitted[0].trim();
-                        String l2 = labelsplitted[1].trim();
+                        String l1 = labelsplit[0].trim().toUpperCase();
+                        String l2 = line;
 
                         if(l1.indexOf(" ")>0)
                         {
