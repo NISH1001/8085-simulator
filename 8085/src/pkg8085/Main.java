@@ -53,6 +53,9 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
 //import pkg8085.core.*;
 
 /**
@@ -102,6 +105,7 @@ public class Main extends Application {
      
     static BorderPane border ;
     static MemoryModule memory ;
+    static Processor proc;
     static TableView<memorytableView> memory_table ;
     static TableView<memorytableView> IO_table ;
     static final ObservableList<memorytableView> memory_data = FXCollections.observableArrayList();
@@ -145,12 +149,12 @@ public class Main extends Application {
        
        //elements 
         memory = new MemoryModule(0, 64*1024) ;
-        
+        proc = new Processor();
+        proc.addDevice(memory);
         
         Label registerlabel = new Label("Register") ;
         Label flaglabel = new Label("Flag") ;
        
-        
         //frame for top bar(eg about)
         topbar = new HBox() ;
         topbar.setPadding(new Insets(5,5,5,5));
@@ -159,11 +163,9 @@ public class Main extends Application {
         //frame(tabs) for editor
                 editorframe = new TabPane();
                 editorframe.setPadding(new Insets(10,10,10,10));
-
                editortab primaryTab = new editortab() ;
                
                
-        
         //frame for showing memory //right panel as tab
            VBox left_panel = new VBox() ;
           TabPane tabPane = new TabPane();
@@ -465,11 +467,11 @@ public class Main extends Application {
         
         //
         //parser object
-        parser = new Parser();
+        //parser = new Parser();
 
-        int start_addr = 8000;
+        int start_addr = 0x8000;
 
-        //if parser is successful get memory
+        /*if parser is successful get memory
         if(parser.InitializeFile("temp.txt", start_addr))
         {
             parser.ShowOriginalLines();
@@ -478,12 +480,43 @@ public class Main extends Application {
             parser.WriteToMemory(memory, start_addr);
                 //initial table from 8000
                memory_table_update(start_addr);
-        }
+        }*/
 
+        Timeline updater = new Timeline(new KeyFrame(Duration.
+            millis(75), new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (proc!=null) {
+                    registerAvalue.setText(Integer.toHexString(
+                                proc.getRegI("A")));
+                    registerBvalue.setText(Integer.toHexString(
+                                proc.getRegI("B")));
+                    registerCvalue.setText(Integer.toHexString(
+                                proc.getRegI("C")));
+                    registerDvalue.setText(Integer.toHexString(
+                                proc.getRegI("D")));
+                    registerEvalue.setText(Integer.toHexString(
+                                proc.getRegI("E")));
+                    registerHvalue.setText(Integer.toHexString(
+                                proc.getRegI("H")));
+                    registerLvalue.setText(Integer.toHexString(
+                                proc.getRegI("L")));
+                    registerPC1value.setText(
+                            Integer.toHexString(
+                                proc.getRegI("PC")/0x100));
+                    registerPC2value.setText(
+                            Integer.toHexString(
+                                proc.getRegI("PC")%0x100));
+                }
+            }
+        }));
         
+        updater.setCycleCount(Timeline.INDEFINITE);
+
         mainStage.setTitle("8085 Simulator :P");
         mainStage.setScene(scene);
         mainStage.show();
+        updater.play();
     }
 
     /**
@@ -492,7 +525,7 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+ 
     
     public static void memory_table_update(int start_address){
         memory_data.clear();
@@ -588,11 +621,14 @@ public class Main extends Application {
               FileChooser fileChooser = new FileChooser();
   
               //Set extension filter
-              FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+              FileChooser.ExtensionFilter extFilter =
+                  new FileChooser.ExtensionFilter(
+                          "TXT files (*.txt)", "*.txt");
               fileChooser.getExtensionFilters().add(extFilter);
               
               //Show save file dialog
-              File file = fileChooser.showSaveDialog(mainStage);
+              File file = fileChooser.showSaveDialog(
+                      mainStage);
               
               if(file != null){
                   String string = ((editortab)editorframe.getSelectionModel().getSelectedItem()).geteditor() ;
@@ -605,26 +641,25 @@ public class Main extends Application {
     }
      
     
-            public void start_parser(TextArea editor){
-                    try {
-                        PrintWriter just_write = new PrintWriter("temp.txt");
-                        just_write.println(editor.getText());
-                        just_write.close();
-                    } catch (FileNotFoundException ex) {
-                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                Parser p = new Parser();
-
-                int start_addr = 8000;
-
-                //if parser is successful get memory
-                if(p.InitializeFile("temp.txt", start_addr))
-                {
-                    p.WriteToMemory(memory, start_addr);
-                        //initial table from 8000
-                       memory_table_update(start_addr);
-                }
+    public void start_parser(TextArea editor){
+            try {
+                PrintWriter just_write =
+                    new PrintWriter("temp.txt");
+                just_write.println(editor.getText());
+                just_write.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Main.class.getName()).
+                    log(Level.SEVERE, null, ex);
             }
+
+        int start_addr = 0x8000;
+        MultipleParser mp = new MultipleParser(memory);
+        mp.initializeString(editor.getText(),start_addr);
+        proc.setRegI("PC",start_addr);
+        Thread proc_thread = new Thread(proc);
+        proc_thread.start();
+        memory_table_update(start_addr);
+    }
 
     
     

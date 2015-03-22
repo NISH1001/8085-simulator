@@ -1,7 +1,3 @@
- 
-mov b,a
-L1 : MVI A,12
-jmp L1
-EF  
-nop
-nop
+LXI H,1234
+INX D
+HLT
