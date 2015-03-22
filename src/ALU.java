@@ -13,9 +13,10 @@ public class ALU {
     }
 
     public int addWithCarry(int first, int second) {
-        int r = add(first, second);
-        if (flags.getFlag("carry"))
+        int r = first+second;
+        if (flags.getFlag("carry")) {
             r++;
+        }
         return flags.adjust(r);
     }
 

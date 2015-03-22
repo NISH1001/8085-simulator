@@ -48,6 +48,8 @@ public class GuiMain extends JFrame implements Runnable {
 
     // Register status labels
     private JLabel rega,regb,regc,regd,rege,regh,regl,regpc;
+    // Flags labels
+    private  JLabel fs,fz,fa,fp,fc;
 
     public GuiMain() {
         initUI();
@@ -66,8 +68,10 @@ public class GuiMain extends JFrame implements Runnable {
         firstitem.title = "New"; firstitem.addTo(tabbedpane);
         mainpanel.add(tabbedpane);
 
-        JPanel statuspanel = panelBoxV();
-        statuspanel.setBorder(BorderFactory.createEmptyBorder(
+        JPanel statuspanel = panelBoxH();
+        JPanel regspanel = panelBoxV();
+        JPanel flagspanel = panelBoxV();
+        regspanel.setBorder(BorderFactory.createEmptyBorder(
                     10,10,10,10));
         JPanel row_title = panelBoxH();
         JPanel row_rega = panelBoxH();
@@ -76,11 +80,12 @@ public class GuiMain extends JFrame implements Runnable {
         JPanel row_reghl = panelBoxH();
         JPanel row_regpc = panelBoxH();
 
-        JLabel title = new JLabel("Processor Status");
+        JLabel title = new JLabel("Registers");
         title.setFont(new Font("Serif",Font.PLAIN,14));
         row_title.add(title);
         rega = new JLabel("A 00");
         row_rega.add(rega);
+        row_rega.add(Box.createRigidArea(new Dimension(33,0)));
         regb = new JLabel("B 00"); regc = new JLabel("C 00");
         row_regbc.add(regb);
         row_regbc.add(Box.createRigidArea(new Dimension(5,0)));
@@ -95,14 +100,41 @@ public class GuiMain extends JFrame implements Runnable {
         row_reghl.add(regl);
         regpc = new JLabel("PC 0000");
         row_regpc.add(regpc);
+        row_regpc.add(Box.createRigidArea(new Dimension(9,0)));
 
-        statuspanel.add(row_title);
-        statuspanel.add(row_rega);
-        statuspanel.add(row_regbc);
-        statuspanel.add(row_regde);
-        statuspanel.add(row_reghl);
-        statuspanel.add(row_regpc);
+        regspanel.add(row_title);
+        regspanel.add(row_rega);
+        regspanel.add(row_regbc);
+        regspanel.add(row_regde);
+        regspanel.add(row_reghl);
+        regspanel.add(row_regpc);
 
+        JPanel row_ftitle = panelBoxH();
+        JPanel row_sign = panelBoxH();
+        JPanel row_zero = panelBoxH();
+        JPanel row_ac = panelBoxH();
+        JPanel row_par = panelBoxH();
+        JPanel row_cy = panelBoxH();
+
+        JLabel ftitle = new JLabel("Flags");
+        ftitle.setFont(new Font("Serif",Font.PLAIN,14));
+        row_ftitle.add(ftitle);
+        fs = new JLabel("S  0");
+        fz = new JLabel("Z  0");
+        fa = new JLabel("AC 0");
+        fp = new JLabel("P  0");
+        fc = new JLabel("CY 0");
+        row_sign.add(fs); row_zero.add(fz);
+        row_ac.add(fa); row_par.add(fp); row_cy.add(fc);
+        flagspanel.add(row_ftitle);
+        flagspanel.add(row_sign);
+        flagspanel.add(row_zero);
+        flagspanel.add(row_ac);
+        flagspanel.add(row_par);
+        flagspanel.add(row_cy);
+
+        statuspanel.add(regspanel);
+        statuspanel.add(flagspanel);
         mainpanel.add(statuspanel);
 
         superpanel.add(mainpanel);
@@ -310,6 +342,16 @@ public class GuiMain extends JFrame implements Runnable {
                         proc.getRegI("L")));
                 regpc.setText("PC "+Integer.toHexString(
                         proc.getRegI("PC")));
+                fs.setText("S  "+(proc.alu.flags.getFlag(
+                                "sign")?"1":"0"));
+                fz.setText("Z  "+(proc.alu.flags.getFlag(
+                                "zero")?"1":"0"));
+                fa.setText("AC "+(proc.alu.flags.getFlag(
+                                "auxcarry")?"1":"0"));
+                fp.setText("P  "+(proc.alu.flags.getFlag(
+                                "parity")?"1":"0"));
+                fc.setText("CY "+(proc.alu.flags.getFlag(
+                                "carry")?"1":"0"));
             }
             Thread.sleep(75);
         } } catch (Exception e) {

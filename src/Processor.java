@@ -3,7 +3,7 @@ import java.util.HashMap;
 
 public class Processor implements Runnable {
 
-    private ALU alu;
+    public ALU alu;
     private HashMap<String,Register> registers;
     private ArrayList<Device> devices;
     private boolean enable_intr;

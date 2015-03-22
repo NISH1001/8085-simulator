@@ -39,7 +39,7 @@ public class Flags extends Register {
         else if (result>0x7f)
             setBit(7,true);
         if (result>res)
-            setBit(0,true);
+            setFlag("carry",true);
         boolean parity = false;
         while (result!=0) {
             if (result%2==1)
