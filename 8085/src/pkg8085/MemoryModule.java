@@ -1,4 +1,5 @@
 package pkg8085;
+import java.util.*;
 
 public class MemoryModule implements Device {
 
@@ -9,6 +10,10 @@ public class MemoryModule implements Device {
         start_addr = (int)start;
         addr_size = (int)size;
         data = new int[size];
+    }
+    
+    public void clear(){
+        Arrays.fill(data, 0);
     }
 
     public boolean hasAddress(int address) {

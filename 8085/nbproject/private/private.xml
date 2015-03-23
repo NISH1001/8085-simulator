@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/home/nishan/Nish/Programming/java/8085-simulator/8085/src/pkg8085/GuiMain.java</file>
+            <file>file:/home/nishan/Nish/Programming/java/8085-simulator/8085/src/pkg8085/Parser.java</file>
+            <file>file:/home/nishan/Nish/Programming/java/8085-simulator/8085/src/pkg8085/DeviceException.java</file>
+            <file>file:/home/nishan/Nish/Programming/java/8085-simulator/8085/src/pkg8085/Opcode.java</file>
+            <file>file:/home/nishan/Nish/Programming/java/8085-simulator/8085/src/pkg8085/MemoryModule.java</file>
+            <file>file:/home/nishan/Nish/Programming/java/8085-simulator/8085/src/pkg8085/alertBox.java</file>
+            <file>file:/home/nishan/Nish/Programming/java/8085-simulator/8085/src/pkg8085/MultipleParser.java</file>
+            <file>file:/home/nishan/Nish/Programming/java/8085-simulator/8085/src/pkg8085/Main.java</file>
+        </group>
     </open-files>
 </project-private>

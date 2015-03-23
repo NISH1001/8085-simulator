@@ -234,7 +234,7 @@ public class Main extends Application {
             memory_table_start_address.setPromptText("Enter Start Adress for memory") ;
             memory_table_start_address_button.setOnAction(e -> {
                 String start_address = memory_table_start_address.getText() ;
-                memory_table_update(Integer.parseInt(start_address));
+                memory_table_update(Integer.parseInt(start_address,16));
             });
             HBox memory_table_start_address_box = new HBox(memory_table_start_address,memory_table_start_address_button) ;
             memory_table_start_address_box.setPadding(new Insets(10,10,10,10));
@@ -545,7 +545,7 @@ public class Main extends Application {
             String value_HEX = Integer.toHexString((int)memory.readByte(i)) ;
             if(value_HEX.length()>2)
                 value_HEX = value_HEX.substring(value_HEX.length()-2) ;
-            memory_data.add(new memorytableView( Integer.toString(i) , value_HEX )) ;
+            memory_data.add(new memorytableView( Integer.toHexString(i) , value_HEX )) ;
         }
  
     }
@@ -650,6 +650,7 @@ public class Main extends Application {
     }
     public void NewFileAction()  {
         editortab editortab = new editortab();
+        this.memory.clear();
     }
      
     

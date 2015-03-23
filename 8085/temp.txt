@@ -1,1 +1,4 @@
-FUCK YOI
+mvi c, 04
+mvi a, 01
+
+hlt
